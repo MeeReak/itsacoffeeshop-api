@@ -6,8 +6,8 @@ namespace smakchet.application.Helpers
     {
         private static readonly Dictionary<string, DateTime> DeprecatedVersions = new()
         {
-            { "2025-06-01", new DateTime(2025, 6, 6,0, 0, 0,DateTimeKind.Utc) }
-        };
+            { "2025-01-01", new DateTime(2025, 1, 1,0, 0, 0,DateTimeKind.Utc) }
+    };
 
         public static async Task<bool> HandleApiVersionDeprecationAsync(HttpContext context)
         {

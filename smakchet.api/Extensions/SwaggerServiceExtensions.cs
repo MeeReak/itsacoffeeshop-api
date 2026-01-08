@@ -1,5 +1,4 @@
-﻿
-using Asp.Versioning.ApiExplorer;
+﻿using Asp.Versioning.ApiExplorer;
 using Microsoft.OpenApi.Models;
 using smakchet.api.Filter;
 
@@ -18,7 +17,7 @@ public static class SwaggerServiceExtensions
             {
                 options.SwaggerDoc(description.GroupName, new OpenApiInfo
                 {
-                    Title = $"Sample API {description.GroupName}",
+                    Title = $"API {description.GroupName}",
                     Version = description.GroupName
                 });
             }

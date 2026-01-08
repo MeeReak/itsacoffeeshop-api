@@ -16,8 +16,7 @@ public class ApiVersionDateParameterFilter : IOperationFilter
             apiVersionParam.Schema.Type = "string";
             apiVersionParam.Schema.Format = "date";
             apiVersionParam.Description = "API version in yyyy-MM-dd format";
-            //apiVersionParam.Example = new Microsoft.OpenApi.Any.OpenApiString("2025-05-01");
-            apiVersionParam.Schema.Default = new Microsoft.OpenApi.Any.OpenApiString("2025-05-01");
+            apiVersionParam.Schema.Default = new Microsoft.OpenApi.Any.OpenApiString("2026-01-01");
         }
     }
 }

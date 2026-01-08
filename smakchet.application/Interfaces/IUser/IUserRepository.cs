@@ -1,15 +1,9 @@
-﻿using smakchet.application.DTOs;
-using smakchet.application.DTOs.Success;
-using smakchet.application.DTOs.User;
+﻿using smakchet.dal.Models;
 
 namespace smakchet.application.Interfaces.IUser
 {
-    public interface IUserRepository
+    public interface IUserRepository : IBaseRepository<User>
     {
-        Task<ResponsePagingDto<UserReadDto>> GetUsersPagedAsync(PaginationQueryParams param);
-        public Task<UserReadDto?> GetUserByIdAsync(int userId);
-        public Task<UserReadDto> UpdateUserAsync(int userId, UserDto user);
-        public Task<UserReadDto> CreateUserAsync(UserDto user);
-        public Task DeleteUserAsync(int userId);
+        IQueryable<User> Query();
     }
 }

@@ -6,7 +6,7 @@ namespace smakchet.application.Mappings
 {
     public class UserMapper : IUserMapper
     {
-        public UserReadDto ToReadDto(User user)
+        public UserReadDto ToSource(User user)
         {
             return new UserReadDto
             {
@@ -21,6 +21,7 @@ namespace smakchet.application.Mappings
             {
                 Name = dto.Name,
                 Email = dto.Email,
+                PasswordHash = dto.Password,
                 CreatedAt = DateTime.UtcNow
             };
         }

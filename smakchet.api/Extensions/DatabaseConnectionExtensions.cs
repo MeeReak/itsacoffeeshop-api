@@ -9,7 +9,7 @@ public static class DatabaseConnectionExtensions
     {
         var connectionString = configuration.GetConnectionString("DbConnection");
 
-        services.AddDbContext<SampleContext>(options =>
+        services.AddDbContext<SmakchetContext>(options =>
         {
             options.UseSqlServer(connectionString);
         });

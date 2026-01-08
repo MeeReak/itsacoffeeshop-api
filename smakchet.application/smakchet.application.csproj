@@ -24,8 +24,4 @@
     <ProjectReference Include="..\smakchet.dal\smakchet.dal.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

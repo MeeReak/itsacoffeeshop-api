@@ -13,5 +13,23 @@ public partial class User
 
     public string Email { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
+    public string PasswordHash { get; set; }
+
+    public int RoleId { get; set; }
+
+    public string PasswordResetToken { get; set; }
+
+    public DateTime? PasswordResetTokenExpiry { get; set; }
+
+    public string Base32Secret { get; set; }
+
+    public bool? IsTotpVerified { get; set; }
+
+    public int? StatusId { get; set; }
 }

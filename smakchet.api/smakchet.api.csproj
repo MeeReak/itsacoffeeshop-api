@@ -20,4 +20,8 @@
     <ProjectReference Include="..\smakchet.application\smakchet.application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\V2025_01_01\" />
+  </ItemGroup>
+
 </Project>
