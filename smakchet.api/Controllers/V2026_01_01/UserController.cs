@@ -47,7 +47,7 @@ namespace smakchet.api.Controllers.V2026_01_01
         [HttpPut("{userId:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateUser(int userId, UserDto data, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateUser(int userId, UserUpdateDto data, CancellationToken cancellationToken)
         {
             await service.UpdateUserAsync(userId, data, cancellationToken);
             return StatusCode(StatusCodes.Status204NoContent);

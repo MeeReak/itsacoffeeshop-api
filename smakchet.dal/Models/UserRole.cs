@@ -5,23 +5,21 @@ using System.Collections.Generic;
 
 namespace smakchet.dal.Models;
 
-public partial class User
+public partial class UserRole
 {
     public int Id { get; set; }
 
-    public string Name { get; set; }
+    public int UserId { get; set; }
 
-    public string Email { get; set; }
+    public int RoleId { get; set; }
 
-    public string PhoneNumber { get; set; }
-
-    public string Profile { get; set; }
-
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual Role Role { get; set; }
+
+    public virtual User User { get; set; }
 }

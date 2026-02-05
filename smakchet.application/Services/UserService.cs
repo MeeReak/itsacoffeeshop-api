@@ -18,6 +18,8 @@ namespace smakchet.application.Services
             await repository.AddAsync(mapped, cancellationToken);
         }
 
+
+
         public async Task DeleteUserAsync(int userId, CancellationToken cancellationToken)
         {
             var user = await repository.GetByIdAsync(userId, cancellationToken);
@@ -26,6 +28,8 @@ namespace smakchet.application.Services
                     ErrorCodeConstants.NotFound);
             await repository.DeleteAsync(user, cancellationToken);
         }
+
+
 
         public async Task<UserReadDto?> GetUserByIdAsync(int userId, CancellationToken cancellationToken)
         {
@@ -36,6 +40,8 @@ namespace smakchet.application.Services
             var result = mapper.ToSource(user);
             return result;
         }
+
+
 
         public async Task<ResponsePagingDto<UserReadDto>> GetUsersPagedAsync(
             PaginationQueryParams param)
@@ -53,13 +59,15 @@ namespace smakchet.application.Services
         }
 
 
-        public async Task UpdateUserAsync(int userId, UserDto user, CancellationToken cancellationToken)
+
+        public async Task UpdateUserAsync(int userId, UserUpdateDto user, CancellationToken cancellationToken)
         {
             var response = await repository.GetByIdAsync(userId, cancellationToken);
             if (response == null)
                 throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "User", userId),
                     ErrorCodeConstants.NotFound);
 
+            mapper.UpdateEntity(response, user);
             await repository.UpdateAsync(response, cancellationToken);
         }
     }

@@ -8,7 +8,7 @@ namespace smakchet.application.Interfaces.IUser
     {
         Task<ResponsePagingDto<UserReadDto>> GetUsersPagedAsync(PaginationQueryParams param);
         public Task<UserReadDto?> GetUserByIdAsync(int userId, CancellationToken cancellationToken);
-        public Task UpdateUserAsync(int userId, UserDto user, CancellationToken cancellationToken);
+        public Task UpdateUserAsync(int userId, UserUpdateDto user, CancellationToken cancellationToken);
         public Task CreateUserAsync(UserDto user, CancellationToken cancellationToken);
         public Task DeleteUserAsync(int userId, CancellationToken cancellationToken);
     }

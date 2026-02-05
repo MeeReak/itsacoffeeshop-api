@@ -12,6 +12,9 @@ namespace smakchet.application.Mappings
             {
                 Id = user.Id,
                 Name = user.Name,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                CreatedDate = user.CreatedAt
             };
         }
 
@@ -21,15 +24,13 @@ namespace smakchet.application.Mappings
             {
                 Name = dto.Name,
                 Email = dto.Email,
-                PasswordHash = dto.Password,
-                CreatedAt = DateTime.UtcNow
+                PhoneNumber = dto.PhoneNumber
             };
         }
 
-        public void UpdateEntity(User user, UserDto dto)
+        public void UpdateEntity(User user, UserUpdateDto dto)
         {
             user.Name = dto.Name;
-            user.Email = dto.Email;
         }
     }
 }

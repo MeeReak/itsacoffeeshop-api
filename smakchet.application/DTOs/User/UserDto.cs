@@ -5,8 +5,6 @@ namespace smakchet.application.DTOs.User
 {
     public class UserDto
     {
-        public int Id { get; set; }
-
         [Required(ErrorMessage = UserMessageConstant.RequiredName)]
         [StringLength(50)]
         [MinLength(2)]
@@ -15,6 +13,8 @@ namespace smakchet.application.DTOs.User
         [EmailAddress(ErrorMessage = UserMessageConstant.InvalidEmailFormat)]
         [Required(ErrorMessage = UserMessageConstant.RequiredEmail)]
         public required string Email { get; set; }
-        public required string Password { get; set; }
+
+        [Required(ErrorMessage = UserMessageConstant.RequiredPhoneNumber)]
+        public required string PhoneNumber { get; set; }
     }
 }

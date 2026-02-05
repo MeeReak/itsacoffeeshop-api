@@ -7,6 +7,6 @@ namespace smakchet.application.Interfaces.IUser
     {
         UserReadDto ToSource(User user);
         User ToEntity(UserDto dto);
-        void UpdateEntity(User user, UserDto dto);
+        void UpdateEntity(User user, UserUpdateDto dto);
     }
 }
