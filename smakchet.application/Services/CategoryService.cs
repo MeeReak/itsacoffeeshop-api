@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using smakchet.application.Constants;
 using smakchet.application.DTOs;
@@ -21,6 +20,14 @@ namespace smakchet.application.Services
     {
         public async Task CreateCategoryAsync(CategoryDto categoryDto, CancellationToken cancellationToken)
         {
+            var existing = await repository.GetByNameAsync(categoryDto.Name, cancellationToken);
+            if (existing is not null)
+            {
+                logger.LogError(ErrorMessageConstants.AlreadyExists, "Category", categoryDto.Name);
+                throw new DuplicateException(string.Format(ErrorMessageConstants.AlreadyExists, "Category", categoryDto.Name),
+                    ErrorCodeConstants.Conflict);
+            }
+
             var mapped = mapper.ToEntity(categoryDto);
             try
             {
@@ -45,6 +52,13 @@ namespace smakchet.application.Services
                 throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "category", categoryId),
                     ErrorCodeConstants.NotFound);
             }
+            if (existing.IsActive == true)
+            {
+                logger.LogError(ErrorMessageConstants.GeneralUnexpectedError);
+                throw new BadRequestException(string.Format(ErrorMessageConstants.GeneralUnexpectedError),
+                    ErrorCodeConstants.BadRequest);
+            }
+
             try
             {
                 await repository.DeleteAsync(existing, cancellationToken);
@@ -74,11 +88,23 @@ namespace smakchet.application.Services
         }
 
 
-
         public async Task<ResponsePagingDto<CategoryReadDto>> GetCategoryPagedAsync(PaginationQueryParams param)
         {
-            var categories = await repository.Query().AsNoTracking().OrderBy(u => u.DisplayOrder)
-                .ToPagedResultAsync(param.Skip, param.Top, mapper.ToReadDto, contextAccessor.HttpContext);
+            var query = repository.Query()
+                .OrderBy(c => c.DisplayOrder);
+
+            if (!string.IsNullOrWhiteSpace(param.Search))
+            {
+                query = (IOrderedQueryable<Category>)query.Where(c => c.Name.Contains(param.Search));
+            }
+
+            var categories = await query
+                .ToPagedResultAsync(
+                    param.Skip,
+                    param.Top,
+                    mapper.ToReadDto,
+                    contextAccessor.HttpContext);
+
             logger.LogInformation(SuccessMessageConstants.Retrieved, "Category");
             return categories;
         }

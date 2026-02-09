@@ -12,5 +12,7 @@ namespace smakchet.application.DTOs.Category
 
         [Required(ErrorMessage = CategoryMessageConstant.RequiredDisplayNumber)]
         public int DisplayOrder { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 }

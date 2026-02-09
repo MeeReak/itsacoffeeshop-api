@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using smakchet.application.Constants.Category;
 using smakchet.application.Constants.User;
+using System.ComponentModel.DataAnnotations;
 
 namespace smakchet.application.DTOs.User
 {
@@ -9,5 +10,8 @@ namespace smakchet.application.DTOs.User
         [StringLength(50)]
         [MinLength(2)]
         public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = UserMessageConstant.RequiredName)]
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }

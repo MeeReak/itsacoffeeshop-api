@@ -27,13 +27,13 @@ namespace smakchet.api.Controllers.V2026_01_01
         [HttpGet("{userId:int}")]
         [ProducesResponseType(typeof(UserReadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
-
         public async Task<IActionResult> GetUser(int userId, CancellationToken cancellationToken)
         {
 
             var user = await service.GetUserByIdAsync(userId, cancellationToken);
             return StatusCode(StatusCodes.Status200OK, user);
         }
+
 
         [HttpPost]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
@@ -44,6 +44,7 @@ namespace smakchet.api.Controllers.V2026_01_01
             return StatusCode(StatusCodes.Status201Created);
         }
 
+
         [HttpPut("{userId:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
@@ -52,6 +53,7 @@ namespace smakchet.api.Controllers.V2026_01_01
             await service.UpdateUserAsync(userId, data, cancellationToken);
             return StatusCode(StatusCodes.Status204NoContent);
         }
+
 
         [HttpDelete("{userId:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -51,6 +51,24 @@ public static class HandlerException
                 };
                 break;
 
+            case DuplicateException brEx:
+                statusCode = StatusCodes.Status409Conflict;
+                errorResponse = new ResponseErrorDto
+                {
+                    Error = new ErrorDto
+                    {
+                        Code = brEx.ErrorCode,
+                        Message = brEx.Message,
+                        Target = brEx.TargetSite!.Name,
+                        InnerError = new InnerErrorDto
+                        {
+                            Code = brEx.ErrorCode,
+                            Message = $"traceId: {brEx.InnerException?.Message}"
+                        }
+                    }
+                };
+                break; 
+
             default:
                 statusCode = StatusCodes.Status500InternalServerError;
                 errorResponse = new ResponseErrorDto

@@ -16,5 +16,7 @@ namespace smakchet.application.DTOs.User
 
         [Required(ErrorMessage = UserMessageConstant.RequiredPhoneNumber)]
         public required string PhoneNumber { get; set; }
+
+        public bool? IsActive { get; set; } = true;
     }
 }

@@ -25,7 +25,8 @@ namespace smakchet.application.Mappings
             {
                 Name = dto.Name,
                 Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber
+                PhoneNumber = dto.PhoneNumber,
+                CreatedAt = DateTime.Now
             };
         }
 

@@ -32,6 +32,7 @@ namespace smakchet.application.Mappings
         {
             entity.Name = dto.Name;
             entity.DisplayOrder = dto.DisplayOrder;
+            entity.IsActive = dto.IsActive;
             entity.UpdatedAt = DateTime.Now;
         }
     }

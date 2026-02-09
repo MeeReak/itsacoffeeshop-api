@@ -6,15 +6,20 @@ using smakchet.application.DTOs.Success;
 using smakchet.application.DTOs.User;
 using smakchet.application.Exceptions;
 using smakchet.application.Helpers;
+using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.IUser;
+using smakchet.dal.Models;
 
 namespace smakchet.application.Services
 {
-    public class UserService(IUserRepository repository, IUserMapper mapper, IHttpContextAccessor contextAccessor) : IUserService
+    public class UserService(
+        IUserRepository repository,
+        IMapper<User, UserReadDto, UserDto, UserUpdateDto> mapper,
+        IHttpContextAccessor contextAccessor) : IUserService
     {
-        public async Task CreateUserAsync(UserDto user, CancellationToken cancellationToken)
+        public async Task CreateUserAsync(UserDto userDto, CancellationToken cancellationToken)
         {
-            var mapped = mapper.ToEntity(user);
+            var mapped = mapper.ToEntity(userDto);
             await repository.AddAsync(mapped, cancellationToken);
         }
 
@@ -37,7 +42,7 @@ namespace smakchet.application.Services
             if (user == null)
                 throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "User", userId),
                     ErrorCodeConstants.NotFound);
-            var result = mapper.ToSource(user);
+            var result = mapper.ToReadDto(user);
             return result;
         }
 
@@ -53,22 +58,22 @@ namespace smakchet.application.Services
                 .ToPagedResultAsync(
                     param.Skip,
                     param.Top,
-                    mapper.ToSource,
+                    mapper.ToReadDto,
                     contextAccessor.HttpContext
                 );
         }
 
 
 
-        public async Task UpdateUserAsync(int userId, UserUpdateDto user, CancellationToken cancellationToken)
+        public async Task UpdateUserAsync(int userId, UserUpdateDto userDto, CancellationToken cancellationToken)
         {
-            var response = await repository.GetByIdAsync(userId, cancellationToken);
-            if (response == null)
+            var user = await repository.GetByIdAsync(userId, cancellationToken);
+            if (user == null)
                 throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "User", userId),
                     ErrorCodeConstants.NotFound);
 
-            mapper.UpdateEntity(response, user);
-            await repository.UpdateAsync(response, cancellationToken);
+            mapper.UpdateEntity(user, userDto);
+            await repository.UpdateAsync(user, cancellationToken);
         }
     }
 }

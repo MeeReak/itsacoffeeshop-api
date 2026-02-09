@@ -41,6 +41,8 @@ public partial class SmakchetContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83F34F7E792");
 
+            entity.HasIndex(e => e.Name, "UQ_Categories_Name").IsUnique();
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -375,6 +377,9 @@ public partial class SmakchetContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_UserRoles_Users");
         });
+
+        modelBuilder.Entity<Category>()
+            .HasQueryFilter(c => c.IsActive == false);
 
         OnModelCreatingPartial(modelBuilder);
     }
