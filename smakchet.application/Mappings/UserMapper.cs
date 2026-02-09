@@ -6,7 +6,7 @@ namespace smakchet.application.Mappings
 {
     public class UserMapper : IUserMapper
     {
-        public UserReadDto ToSource(User user)
+        public UserReadDto ToReadDto(User user)
         {
             return new UserReadDto
             {
@@ -14,6 +14,7 @@ namespace smakchet.application.Mappings
                 Name = user.Name,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
+                Profile = user.Profile,
                 CreatedDate = user.CreatedAt
             };
         }
@@ -31,6 +32,7 @@ namespace smakchet.application.Mappings
         public void UpdateEntity(User user, UserUpdateDto dto)
         {
             user.Name = dto.Name;
+            user.UpdatedAt = DateTime.Now;
         }
     }
 }

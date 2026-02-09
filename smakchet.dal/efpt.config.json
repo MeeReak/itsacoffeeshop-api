@@ -15,6 +15,38 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[dbo].[Categories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ErrorLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Orders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderStatusLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Payments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Products]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Receipts]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[Roles]",
          "ObjectType": 0
       },

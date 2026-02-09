@@ -17,11 +17,21 @@ public partial class User
 
     public string Profile { get; set; }
 
+    public string PasswordHash { get; set; }
+
+    public string ProfileImage { get; set; }
+
+    public bool? IsActive { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
-    public DateTime? DeletedAt { get; set; }
+    public virtual ICollection<OrderStatusLog> OrderStatusLogs { get; set; } = new List<OrderStatusLog>();
+
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

@@ -13,6 +13,22 @@ public partial class SmakchetContext : DbContext
     {
     }
 
+    public virtual DbSet<Category> Categories { get; set; }
+
+    public virtual DbSet<ErrorLog> ErrorLogs { get; set; }
+
+    public virtual DbSet<Order> Orders { get; set; }
+
+    public virtual DbSet<OrderItem> OrderItems { get; set; }
+
+    public virtual DbSet<OrderStatusLog> OrderStatusLogs { get; set; }
+
+    public virtual DbSet<Payment> Payments { get; set; }
+
+    public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<Receipt> Receipts { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -21,53 +37,335 @@ public partial class SmakchetContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83F34F7E792");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+        });
+
+        modelBuilder.Entity<ErrorLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ErrorLog__3213E83F35251D70");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Action)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("action");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.ErrorCode)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("error_code");
+            entity.Property(e => e.ErrorMessage)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("error_message");
+            entity.Property(e => e.IsResolved)
+                .HasDefaultValue(false)
+                .HasColumnName("is_resolved");
+            entity.Property(e => e.Payload)
+                .IsUnicode(false)
+                .HasColumnName("payload");
+            entity.Property(e => e.ReferenceId).HasColumnName("reference_id");
+            entity.Property(e => e.Source)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("source");
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Orders__3213E83F639BD7AF");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CashierId).HasColumnName("cashier_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.OrderNumber).HasColumnName("order_number");
+            entity.Property(e => e.OrderType)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("order_type");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("status");
+            entity.Property(e => e.Subtotal)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("subtotal");
+            entity.Property(e => e.Tax)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("tax");
+            entity.Property(e => e.Total)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("total");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.Cashier).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.CashierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_orders_users");
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__OrderIte__3213E83F1A5FD512");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Note)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("note");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.Price)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("price");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProductName)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("product_name");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.Size)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("size");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("fk_orderitems_orders");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_orderitems_products");
+        });
+
+        modelBuilder.Entity<OrderStatusLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__OrderSta__3213E83FE4792F38");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ChangedBy).HasColumnName("changed_by");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.NewStatus)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("new_status");
+            entity.Property(e => e.OldStatus)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("old_status");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+
+            entity.HasOne(d => d.ChangedByNavigation).WithMany(p => p.OrderStatusLogs)
+                .HasForeignKey(d => d.ChangedBy)
+                .HasConstraintName("fk_statuslogs_users");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderStatusLogs)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_statuslogs_orders");
+        });
+
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Payments__3213E83F25E80AC8");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Amount)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("amount");
+            entity.Property(e => e.CashierId).HasColumnName("cashier_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Method)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("method");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.PaidAt)
+                .HasColumnType("datetime")
+                .HasColumnName("paid_at");
+            entity.Property(e => e.ReferenceCode)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("reference_code");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("status");
+
+            entity.HasOne(d => d.Cashier).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.CashierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_payments_users");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_payments_orders");
+        });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Products__3213E83F42162292");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
+            entity.Property(e => e.ImageUrl)
+                .IsUnicode(false)
+                .HasColumnName("image_url");
+            entity.Property(e => e.IsFeatured)
+                .HasDefaultValue(false)
+                .HasColumnName("is_featured");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.Price)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("price");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Products)
+                .HasForeignKey(d => d.CategoryId)
+                .HasConstraintName("fk_products_categories");
+        });
+
+        modelBuilder.Entity<Receipt>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Receipts__3213E83F2D7AF753");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.PrintedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("printed_at");
+            entity.Property(e => e.ReceiptNumber).HasColumnName("receipt_number");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.Receipts)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_receipts_orders");
+        });
+
         modelBuilder.Entity<Role>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07432F91ED");
 
             entity.HasIndex(e => e.Name, "UQ__Roles__737584F622A85962").IsUnique();
 
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.DeletedAt).HasColumnType("datetime");
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasMaxLength(50);
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+                .HasMaxLength(50)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Users__3214EC0740C7F2BB");
 
+            entity.HasIndex(e => e.Email, "email").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.DeletedAt).HasColumnType("datetime");
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("email");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.PasswordHash)
+                .HasMaxLength(10)
+                .IsFixedLength()
+                .HasColumnName("password_hash");
             entity.Property(e => e.PhoneNumber)
                 .IsRequired()
                 .HasMaxLength(13)
-                .IsUnicode(false);
-            entity.Property(e => e.Profile).IsUnicode(false);
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+                .IsUnicode(false)
+                .HasColumnName("phone_number");
+            entity.Property(e => e.Profile)
+                .IsUnicode(false)
+                .HasColumnName("profile");
+            entity.Property(e => e.ProfileImage)
+                .IsUnicode(false)
+                .HasColumnName("profile_image");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
         });
 
         modelBuilder.Entity<UserRole>(entity =>
         {
             entity.HasIndex(e => new { e.UserId, e.RoleId }, "UQ_UserRoles_User_Role").IsUnique();
 
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.DeletedAt).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Role).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.RoleId)
