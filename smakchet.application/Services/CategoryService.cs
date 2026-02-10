@@ -32,7 +32,7 @@ namespace smakchet.application.Services
             try
             {
                 await repository.AddAsync(mapped, cancellationToken);
-                logger.LogInformation(SuccessMessageConstants.Created, "CreateCategory");
+                logger.LogInformation(SuccessMessageConstants.Created, "Category");
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace smakchet.application.Services
             try
             {
                 await repository.DeleteAsync(existing, cancellationToken);
-                logger.LogInformation(SuccessMessageConstants.Deleted, "DeleteCategory");
+                logger.LogInformation(SuccessMessageConstants.Deleted, "Category");
             }
             catch (Exception ex)
             {
@@ -91,7 +91,8 @@ namespace smakchet.application.Services
         public async Task<ResponsePagingDto<CategoryReadDto>> GetCategoryPagedAsync(PaginationQueryParams param)
         {
             var query = repository.Query()
-                .OrderBy(c => c.DisplayOrder);
+                .OrderBy(c => c.DisplayOrder)
+                .Where(c => c.IsActive == true);
 
             if (!string.IsNullOrWhiteSpace(param.Search))
             {
@@ -125,7 +126,7 @@ namespace smakchet.application.Services
             {
                 mapper.UpdateEntity(existing, categoryDto);
                 await repository.UpdateAsync(existing, cancellationToken);
-                logger.LogInformation(SuccessMessageConstants.Updated, "UpdateCategory");
+                logger.LogInformation(SuccessMessageConstants.Updated, "Category");
             }
             catch (Exception ex)
             {

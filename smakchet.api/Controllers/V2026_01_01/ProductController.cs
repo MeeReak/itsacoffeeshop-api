@@ -1,0 +1,67 @@
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
+using smakchet.application.DTOs;
+using smakchet.application.DTOs.Product;
+using smakchet.application.DTOs.Error;
+using smakchet.application.DTOs.Success;
+using smakchet.application.Interfaces.IProduct;
+
+namespace smakchet.api.Controllers.V2026_01_01
+{
+    [ApiVersion("2026-01-01")]
+    [Route("products")]
+    [Produces("application/json")]
+    [ApiController]
+    public class ProductController(IProductService service) : ControllerBase
+    {
+        [HttpGet]
+        [ProducesResponseType(typeof(ResponsePagingDto<ProductReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPag([FromQuery] PaginationQueryParams param)
+        {
+            var categories = await service.GetProductPagedAsync(param);
+            return StatusCode(StatusCodes.Status200OK, categories);
+        }
+
+
+        [HttpGet("{ProductId:int}")]
+        [ProducesResponseType(typeof(ProductReadDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProduct(int ProductId, CancellationToken cancellationToken)
+        {
+
+            var product = await service.GetProductByIdAsync(ProductId, cancellationToken);
+            return StatusCode(StatusCodes.Status200OK, product);
+        }
+
+
+        [HttpPost]
+        [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SaveProduct([FromBody] ProductDto productDto, CancellationToken cancellationToken)
+        {
+            await service.CreateProductAsync(productDto, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created);
+        }
+
+
+        [HttpPut("{ProductId:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateProduct(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken)
+        {
+            await service.UpdateProductAsync(productId, productDto, cancellationToken);
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+
+
+        [HttpDelete("{ProductId:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteProduct(int productId, CancellationToken cancellationToken)
+        {
+            await service.DeleteProductAsync(productId, cancellationToken);
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+    }
+}

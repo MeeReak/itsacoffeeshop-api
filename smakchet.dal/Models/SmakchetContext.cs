@@ -49,6 +49,9 @@ public partial class SmakchetContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
+            entity.Property(e => e.ImageUrl)
+                .IsUnicode(false)
+                .HasColumnName("image_url");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
@@ -250,8 +253,14 @@ public partial class SmakchetContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Products__3213E83F42162292");
 
+            entity.HasIndex(e => e.Name, "UQ_Products_Name").IsUnique();
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
             entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
             entity.Property(e => e.ImageUrl)
                 .IsUnicode(false)
@@ -267,6 +276,9 @@ public partial class SmakchetContext : DbContext
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
@@ -377,9 +389,6 @@ public partial class SmakchetContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_UserRoles_Users");
         });
-
-        modelBuilder.Entity<Category>()
-            .HasQueryFilter(c => c.IsActive == false);
 
         OnModelCreatingPartial(modelBuilder);
     }
