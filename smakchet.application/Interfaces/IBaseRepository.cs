@@ -7,5 +7,6 @@
         Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken);
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken);
         Task UpdateAsync(T entity, CancellationToken cancellationToken);
+        IQueryable<T> Query();
     }
 }

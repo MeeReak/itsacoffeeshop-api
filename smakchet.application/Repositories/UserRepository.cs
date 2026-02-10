@@ -5,8 +5,4 @@ namespace smakchet.application.Repositories;
 
 public class UserRepository(SmakchetContext context) : BaseRepository<User>(context), IUserRepository
 {
-    public IQueryable<User> Query()
-    {
-        return context.Users;
-    }
 }

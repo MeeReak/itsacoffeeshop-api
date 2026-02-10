@@ -11,10 +11,4 @@ public class CategoryRepository(SmakchetContext context) : BaseRepository<Catego
         return await context.Categories
             .FirstOrDefaultAsync(c => c.Name == name, cancellationToken);
     }
-
-
-    public IQueryable<Category> Query()
-    {
-        return context.Categories;
-    }
 }

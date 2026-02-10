@@ -41,6 +41,8 @@ namespace smakchet.application.Services
             }
         }
 
+
+
         public async Task DeleteProductAsync(int productId, CancellationToken cancellationToken)
         {
             var existing = await repository.GetByIdAsync(productId, cancellationToken);
@@ -63,6 +65,8 @@ namespace smakchet.application.Services
             }
         }
 
+
+
         public async Task<ProductReadDto?> GetProductByIdAsync(int productId, CancellationToken cancellationToken)
         {
             var existing = await repository.GetByIdAsync(productId, cancellationToken);
@@ -77,6 +81,8 @@ namespace smakchet.application.Services
             logger.LogInformation(SuccessMessageConstants.Retrieved, "Product");
             return result;
         }
+
+
 
         public async Task<ResponsePagingDto<ProductReadDto>> GetProductPagedAsync(PaginationQueryParams param)
         {
@@ -100,6 +106,8 @@ namespace smakchet.application.Services
             logger.LogInformation(SuccessMessageConstants.Retrieved, "Product");
             return products;
         }
+
+
 
         public async Task UpdateProductAsync(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken)
         {

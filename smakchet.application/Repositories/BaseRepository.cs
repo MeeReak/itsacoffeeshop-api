@@ -33,5 +33,10 @@ namespace smakchet.application.Repositories
             context.Set<T>().Update(entity);
             await context.SaveChangesAsync(cancellationToken);
         }
+
+        public IQueryable<T> Query()
+        {
+            return context.Set<T>();
+        }
     }
 }

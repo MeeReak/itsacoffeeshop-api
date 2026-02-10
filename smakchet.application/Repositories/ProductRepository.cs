@@ -11,10 +11,4 @@ public class ProductRepository(SmakchetContext context) : BaseRepository<Product
         return await context.Products
             .FirstOrDefaultAsync(c => c.Name == name, cancellationToken);
     }
-
-
-    public IQueryable<Product> Query()
-    {
-        return context.Products;
-    }
 }
