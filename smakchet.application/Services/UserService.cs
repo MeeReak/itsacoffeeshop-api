@@ -17,10 +17,12 @@ namespace smakchet.application.Services
         IMapper<User, UserReadDto, UserDto, UserUpdateDto> mapper,
         IHttpContextAccessor contextAccessor) : IUserService
     {
-        public async Task CreateUserAsync(UserDto userDto, CancellationToken cancellationToken)
+        public async Task<UserReadDto> CreateUserAsync(UserDto userDto, CancellationToken cancellationToken)
         {
             var mapped = mapper.ToEntity(userDto);
             await repository.AddAsync(mapped, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
+            return mapper.ToReadDto(mapped);
         }
 
 
@@ -32,6 +34,7 @@ namespace smakchet.application.Services
                 throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "User", userId),
                     ErrorCodeConstants.NotFound);
             await repository.DeleteAsync(user, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
         }
 
 
@@ -65,7 +68,7 @@ namespace smakchet.application.Services
 
 
 
-        public async Task UpdateUserAsync(int userId, UserUpdateDto userDto, CancellationToken cancellationToken)
+        public async Task<UserReadDto?> UpdateUserAsync(int userId, UserUpdateDto userDto, CancellationToken cancellationToken)
         {
             var user = await repository.GetByIdAsync(userId, cancellationToken);
             if (user == null)
@@ -74,6 +77,8 @@ namespace smakchet.application.Services
 
             mapper.UpdateEntity(user, userDto);
             await repository.UpdateAsync(user, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
+            return mapper.ToReadDto(user);
         }
     }
 }

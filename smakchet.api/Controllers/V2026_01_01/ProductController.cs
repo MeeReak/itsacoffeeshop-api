@@ -40,8 +40,8 @@ namespace smakchet.api.Controllers.V2026_01_01
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SaveProduct([FromBody] ProductDto productDto, CancellationToken cancellationToken)
         {
-            await service.CreateProductAsync(productDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created);
+            var product = await service.CreateProductAsync(productDto, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, product);
         }
 
 

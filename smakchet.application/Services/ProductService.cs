@@ -18,7 +18,7 @@ namespace smakchet.application.Services
         ILogger<ProductService> logger,
         IHttpContextAccessor contextAccessor) : IProductService
     {
-        public async Task CreateProductAsync(ProductDto productDto, CancellationToken cancellationToken)
+        public async Task<ProductReadDto> CreateProductAsync(ProductDto productDto, CancellationToken cancellationToken)
         {
             var existing = await repository.GetByNameAsync(productDto.Name, cancellationToken);
             if (existing is not null)
@@ -32,7 +32,10 @@ namespace smakchet.application.Services
             {
                 var mapped = mapper.ToEntity(productDto);
                 await repository.AddAsync(mapped, cancellationToken);
+                await repository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "Product");
+
+                return mapper.ToReadDto(mapped);
             }
             catch (Exception ex)
             {
@@ -56,6 +59,7 @@ namespace smakchet.application.Services
             try
             {
                 await repository.DeleteAsync(existing, cancellationToken);
+                await repository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Deleted, "Product");
             }
             catch (Exception ex)
@@ -109,7 +113,7 @@ namespace smakchet.application.Services
 
 
 
-        public async Task UpdateProductAsync(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken)
+        public async Task<ProductReadDto?> UpdateProductAsync(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken)
         {
             var existing = await repository.GetByIdAsync(productId, cancellationToken);
             if (existing is null)
@@ -123,7 +127,9 @@ namespace smakchet.application.Services
             {
                 mapper.UpdateEntity(existing, productDto);
                 await repository.UpdateAsync(existing, cancellationToken);
+                await repository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Updated, "Product");
+                return mapper.ToReadDto(existing);
             }
             catch (Exception ex)
             {

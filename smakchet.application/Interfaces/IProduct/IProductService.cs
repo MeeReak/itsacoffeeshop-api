@@ -8,8 +8,8 @@ namespace smakchet.application.Interfaces.IProduct
     {
         Task<ResponsePagingDto<ProductReadDto>> GetProductPagedAsync(PaginationQueryParams param);
         public Task<ProductReadDto?> GetProductByIdAsync(int productId, CancellationToken cancellationToken);
-        public Task UpdateProductAsync(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken);
-        public Task CreateProductAsync(ProductDto productDto, CancellationToken cancellationToken);
+        public Task<ProductReadDto?> UpdateProductAsync(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken);
+        public Task<ProductReadDto> CreateProductAsync(ProductDto productDto, CancellationToken cancellationToken);
         public Task DeleteProductAsync(int productId, CancellationToken cancellationToken);
     }
 }

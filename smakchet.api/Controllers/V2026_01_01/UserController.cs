@@ -5,6 +5,7 @@ using smakchet.application.DTOs.Error;
 using smakchet.application.DTOs.Success;
 using smakchet.application.DTOs.User;
 using smakchet.application.Interfaces.IUser;
+using smakchet.dal.Models;
 
 namespace smakchet.api.Controllers.V2026_01_01
 {
@@ -38,20 +39,20 @@ namespace smakchet.api.Controllers.V2026_01_01
         [HttpPost]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> SaveUser([FromBody] UserDto user, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveUser([FromBody] UserDto userDto, CancellationToken cancellationToken)
         {
-            await service.CreateUserAsync(user, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created);
+            var user = await service.CreateUserAsync(userDto, cancellationToken);
+            return StatusCode(StatusCodes.Status200OK, user);
         }
 
 
         [HttpPut("{userId:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateUser(int userId, UserUpdateDto data, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateUser(int userId, UserUpdateDto userDto, CancellationToken cancellationToken)
         {
-            await service.UpdateUserAsync(userId, data, cancellationToken);
-            return StatusCode(StatusCodes.Status204NoContent);
+            var user = await service.UpdateUserAsync(userId, userDto, cancellationToken);
+            return StatusCode(StatusCodes.Status200OK, user);
         }
 
 

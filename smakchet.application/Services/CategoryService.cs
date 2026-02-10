@@ -18,7 +18,7 @@ namespace smakchet.application.Services
         ILogger<CategoryService> logger,
         IHttpContextAccessor contextAccessor) : ICategoryService
     {
-        public async Task CreateCategoryAsync(CategoryDto categoryDto, CancellationToken cancellationToken)
+        public async Task<CategoryReadDto> CreateCategoryAsync(CategoryDto categoryDto, CancellationToken cancellationToken)
         {
             var existing = await repository.GetByNameAsync(categoryDto.Name, cancellationToken);
             if (existing is not null)
@@ -32,7 +32,10 @@ namespace smakchet.application.Services
             try
             {
                 await repository.AddAsync(mapped, cancellationToken);
+                await repository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "Category");
+
+                return mapper.ToReadDto(mapped);
             }
             catch (Exception ex)
             {
@@ -62,6 +65,7 @@ namespace smakchet.application.Services
             try
             {
                 await repository.DeleteAsync(existing, cancellationToken);
+                await repository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Deleted, "Category");
             }
             catch (Exception ex)
@@ -112,7 +116,7 @@ namespace smakchet.application.Services
 
 
 
-        public async Task UpdateCategoryAsync(int categoryId, CategoryUpdateDto categoryDto, CancellationToken cancellationToken)
+        public async Task<CategoryReadDto> UpdateCategoryAsync(int categoryId, CategoryUpdateDto categoryDto, CancellationToken cancellationToken)
         {
             var existing = await repository.GetByIdAsync(categoryId, cancellationToken);
             if (existing == null)
@@ -126,7 +130,9 @@ namespace smakchet.application.Services
             {
                 mapper.UpdateEntity(existing, categoryDto);
                 await repository.UpdateAsync(existing, cancellationToken);
+                await repository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Updated, "Category");
+                return mapper.ToReadDto(existing);
             }
             catch (Exception ex)
             {

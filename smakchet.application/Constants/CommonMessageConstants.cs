@@ -13,8 +13,9 @@
         public const string Conflict = "A conflict occurred with the current state of the resource.";
         public const string ResourceNotFoundById = "{0} with Id {1} was not found.";
         public const string ResourceNotFoundByName = "{0} with Name {1} was not found.";
+        public const string InvalidEnumValue = "Invalid value '{0}'. Allowed values are: {1}.";
         public const string AlreadyExists = "{0} with {1} already exists.";
-        public const string OperationFailed = "{0} operation failed. Please try again.";
+        public const string OperationFailed = "{0} operation failed. Please try again."; 
     }
 
     public static class SuccessMessageConstants

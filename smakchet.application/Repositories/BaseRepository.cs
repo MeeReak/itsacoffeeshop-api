@@ -2,41 +2,51 @@
 using smakchet.application.Interfaces;
 using smakchet.dal.Models;
 
-namespace smakchet.application.Repositories
+namespace smakchet.application.Repositories;
+
+public class BaseRepository<T>(SmakchetContext context) : IBaseRepository<T>
+    where T : class
 {
-    public class BaseRepository<T>(SmakchetContext context) : IBaseRepository<T> where T : class
+    public Task AddAsync(T entity, CancellationToken cancellationToken)
     {
-        public async Task AddAsync(T entity, CancellationToken cancellationToken)
-        {
-            context.Set<T>().Add(entity);
-            await context.SaveChangesAsync(cancellationToken);
-        }
+        context.Set<T>().Add(entity);
+        return Task.CompletedTask;
+    }
 
-        public async Task DeleteAsync(T entity, CancellationToken cancellationToken)
-        {
-            context.Set<T>().Remove(entity);
-            await context.SaveChangesAsync(cancellationToken);
-        }
+    public Task DeleteAsync(T entity, CancellationToken cancellationToken)
+    {
+        context.Set<T>().Remove(entity);
+        return Task.CompletedTask;
+    }
 
-        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken)
-        {
-            return await context.Set<T>().AsNoTracking().ToListAsync<T>(cancellationToken);
-        }
+    public Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    {
+        context.Set<T>().Update(entity);
+        return Task.CompletedTask;
+    }
 
-        public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            return await context.Set<T>().FindAsync(id, cancellationToken);
-        }
+    public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return await context.Set<T>().FindAsync(
+            new object[] { id },
+            cancellationToken
+        );
+    }
 
-        public async Task UpdateAsync(T entity, CancellationToken cancellationToken)
-        {
-            context.Set<T>().Update(entity);
-            await context.SaveChangesAsync(cancellationToken);
-        }
+    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await context.Set<T>()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
 
-        public IQueryable<T> Query()
-        {
-            return context.Set<T>();
-        }
+    public IQueryable<T> Query()
+    {
+        return context.Set<T>();
+    }
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return context.SaveChangesAsync(cancellationToken);
     }
 }

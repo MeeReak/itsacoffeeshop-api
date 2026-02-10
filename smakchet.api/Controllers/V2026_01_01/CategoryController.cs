@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using smakchet.application.DTOs;
 using smakchet.application.DTOs.Category;
 using smakchet.application.DTOs.Error;
+using smakchet.application.DTOs.Product;
 using smakchet.application.DTOs.Success;
 using smakchet.application.Interfaces.ICategory;
 
@@ -40,8 +41,8 @@ namespace smakchet.api.Controllers.V2026_01_01
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SaveCategory([FromBody] CategoryDto categoryDto, CancellationToken cancellationToken)
         {
-            await service.CreateCategoryAsync(categoryDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created);
+            var category = await service.CreateCategoryAsync(categoryDto, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, category);
         }
 
 
@@ -50,8 +51,8 @@ namespace smakchet.api.Controllers.V2026_01_01
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCategory(int categoryId, CategoryUpdateDto categoryDto, CancellationToken cancellationToken)
         {
-            await service.UpdateCategoryAsync(categoryId, categoryDto, cancellationToken);
-            return StatusCode(StatusCodes.Status204NoContent);
+            var category = await service.UpdateCategoryAsync(categoryId, categoryDto, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, category);
         }
 
 
