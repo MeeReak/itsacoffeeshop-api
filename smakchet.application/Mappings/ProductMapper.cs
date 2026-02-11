@@ -40,6 +40,7 @@ namespace smakchet.application.Mappings
             entity.Price = dto.Price;
             entity.DisplayOrder = dto.DisplayOrder;
             entity.IsFeatured = dto.IsFeatured;
+            entity.UpdatedAt = DateTime.Now;
         }
     }
 }

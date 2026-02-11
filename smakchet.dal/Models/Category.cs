@@ -17,7 +17,7 @@ public partial class Category
 
     public string ImageUrl { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 

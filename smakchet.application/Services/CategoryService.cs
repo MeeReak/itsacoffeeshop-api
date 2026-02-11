@@ -28,13 +28,12 @@ namespace smakchet.application.Services
                     ErrorCodeConstants.Conflict);
             }
 
-            var mapped = mapper.ToEntity(categoryDto);
             try
             {
+                var mapped = mapper.ToEntity(categoryDto);
                 await repository.AddAsync(mapped, cancellationToken);
                 await repository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "Category");
-
                 return mapper.ToReadDto(mapped);
             }
             catch (Exception ex)
@@ -92,6 +91,7 @@ namespace smakchet.application.Services
         }
 
 
+
         public async Task<ResponsePagingDto<CategoryReadDto>> GetCategoryPagedAsync(PaginationQueryParams param)
         {
             var query = repository.Query()
@@ -116,7 +116,7 @@ namespace smakchet.application.Services
 
 
 
-        public async Task<CategoryReadDto> UpdateCategoryAsync(int categoryId, CategoryUpdateDto categoryDto, CancellationToken cancellationToken)
+        public async Task<CategoryReadDto?> UpdateCategoryAsync(int categoryId, CategoryUpdateDto categoryDto, CancellationToken cancellationToken)
         {
             var existing = await repository.GetByIdAsync(categoryId, cancellationToken);
             if (existing == null)

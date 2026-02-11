@@ -24,13 +24,13 @@ namespace smakchet.api.Controllers.V2026_01_01
         }
 
 
-        [HttpGet("{ProductId:int}")]
+        [HttpGet("{productId:int}")]
         [ProducesResponseType(typeof(ProductReadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetProduct(int ProductId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetProduct(int productId, CancellationToken cancellationToken)
         {
 
-            var product = await service.GetProductByIdAsync(ProductId, cancellationToken);
+            var product = await service.GetProductByIdAsync(productId, cancellationToken);
             return StatusCode(StatusCodes.Status200OK, product);
         }
 
@@ -45,7 +45,7 @@ namespace smakchet.api.Controllers.V2026_01_01
         }
 
 
-        [HttpPut("{ProductId:int}")]
+        [HttpPut("{productId:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProduct(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken)

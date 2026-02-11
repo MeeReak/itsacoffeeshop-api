@@ -110,11 +110,7 @@ public partial class SmakchetContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.OrderNumber).HasColumnName("order_number");
-            entity.Property(e => e.OrderType)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("order_type");
+            entity.Property(e => e.Number).HasColumnName("number");
             entity.Property(e => e.Status)
                 .IsRequired()
                 .HasMaxLength(20)
@@ -129,6 +125,10 @@ public partial class SmakchetContext : DbContext
             entity.Property(e => e.Total)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("total");
+            entity.Property(e => e.Type)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("type");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")

@@ -9,9 +9,9 @@ public partial class Order
 {
     public int Id { get; set; }
 
-    public int OrderNumber { get; set; }
+    public int Number { get; set; }
 
-    public string OrderType { get; set; }
+    public string Type { get; set; }
 
     public string Status { get; set; }
 
