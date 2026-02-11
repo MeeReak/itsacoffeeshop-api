@@ -11,19 +11,19 @@ public partial class Order
 
     public int Number { get; set; }
 
-    public string Type { get; set; }
+    public int Type { get; set; }
 
-    public string Status { get; set; }
+    public int Status { get; set; }
 
-    public decimal? Subtotal { get; set; }
+    public decimal Subtotal { get; set; }
 
-    public decimal? Tax { get; set; }
+    public decimal Tax { get; set; }
 
-    public decimal? Total { get; set; }
+    public decimal Total { get; set; }
 
     public int CashierId { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 

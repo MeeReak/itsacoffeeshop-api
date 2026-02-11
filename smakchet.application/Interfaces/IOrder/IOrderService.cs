@@ -2,6 +2,7 @@
 using smakchet.application.DTOs.Order;
 using smakchet.application.DTOs.OrderItem;
 using smakchet.application.DTOs.Success;
+using smakchet.dal.Models;
 
 namespace smakchet.application.Interfaces.IOrder
 {
@@ -13,5 +14,6 @@ namespace smakchet.application.Interfaces.IOrder
         Task<OrderReadDto> CreateOrderAsync(OrderDto orderDto, CancellationToken cancellationToken);
         Task DeleteOrderAsync(int orderId, CancellationToken cancellationToken);
         Task AddItemAsync(int orderId, OrderItemDto itemDto, CancellationToken cancellationToken);
+        Task RemoveItemAsync(int orderId, int itemId, CancellationToken cancellationToken);
     }
 }

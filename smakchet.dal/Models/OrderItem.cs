@@ -19,11 +19,11 @@ public partial class OrderItem
 
     public decimal Price { get; set; }
 
-    public string Size { get; set; }
+    public int Size { get; set; }
 
     public string Note { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public virtual Order Order { get; set; }
 

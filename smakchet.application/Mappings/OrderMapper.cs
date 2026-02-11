@@ -1,4 +1,6 @@
-﻿using smakchet.application.DTOs.Order;
+﻿using smakchet.application.Constants.Enum;
+using smakchet.application.DTOs.Order;
+using smakchet.application.DTOs.OrderItem;
 using smakchet.application.Interfaces.IOrder;
 using smakchet.dal.Models;
 
@@ -11,8 +13,8 @@ namespace smakchet.application.Mappings
             return new Order
             {
                 Number = dto.Number,
-                Type = dto.Type,
-                Status = dto.Status,
+                Type = (int)dto.Type,
+                Status = (int)dto.Status,
                 Subtotal = dto.Subtotal,
                 Total = dto.Total,
                 Tax = dto.Tax,
@@ -26,20 +28,32 @@ namespace smakchet.application.Mappings
             {
                 Id = entity.Id,
                 Number = entity.Number,
-                Status = entity.Status,
-                Type = entity.Type,
-                Tax = (decimal)entity.Tax,
-                Subtotal = (decimal)entity.Subtotal,
+                Status = (OrderStatusEnum)entity.Status,
+                Type = (OrderTypeEnum)entity.Type,
+                Tax = entity.Tax,
+                Subtotal = entity.Subtotal,
                 CashierId = entity.CashierId,
-                Total = (decimal)entity.Total,
-                CreatedAt = entity.CreatedAt
+                Total = entity.Total,
+                CreatedAt = entity.CreatedAt,
+                Items = entity.OrderItems
+                    .Select(item => new OrderItemReadDto
+                    {
+                        Id = item.Id,
+                        ProductId = item.ProductId,
+                        ProductName = item.ProductName,
+                        Quantity = item.Quantity,
+                        Price = item.Price,
+                        Size = (OrderItemSizeEnum)item.Size,
+                        Note = item.Note
+                    })
+                    .ToList()
             };
         }
 
         public void UpdateEntity(Order entity, OrderUpdateDto dto)
         {
-            entity.Status = dto.Status;
-            entity.Type = dto.Type;
+            entity.Status = (int)dto.Status;
+            entity.Type = (int)dto.Type;
             entity.Tax = dto.Tax;
             entity.Subtotal = dto.Subtotal;
             entity.Total = dto.Total;

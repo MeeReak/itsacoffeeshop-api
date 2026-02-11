@@ -1,28 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
-using smakchet.application.Constants;
+﻿using smakchet.application.Constants;
 using smakchet.application.Constants.Enum;
+using smakchet.application.Constants.Order;
+using System.ComponentModel.DataAnnotations;
 
 namespace smakchet.application.Validation
 {
-    public class OrderItemSizeValidationAttribute : ValidationAttribute
+    public class OrderStatusValidationAttribute : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            if (value is not string type || string.IsNullOrWhiteSpace(type))
+            if (value is not OrderStatusEnum size)
             {
-                return new ValidationResult(
-                    ErrorMessageConstants.ValidationFailed
-                );
+                return new ValidationResult(OrderMessageConstant.RequiredSize);
             }
 
-            if (!Enum.TryParse<OrderItemSizeEnum>(type, true, out _))
+            if (!Enum.IsDefined(typeof(OrderStatusEnum), size))
             {
-                var allowedValues = string.Join(", ", Enum.GetNames(typeof(OrderItemSizeEnum)));
-
+                var allowedValues = string.Join(", ", Enum.GetNames(typeof(OrderStatusEnum)));
                 return new ValidationResult(
                     string.Format(
                         ErrorMessageConstants.InvalidEnumValue,
-                        type,
+                        size,
                         allowedValues
                     )
                 );

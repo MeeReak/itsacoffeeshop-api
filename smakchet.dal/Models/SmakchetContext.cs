@@ -111,11 +111,7 @@ public partial class SmakchetContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.Number).HasColumnName("number");
-            entity.Property(e => e.Status)
-                .IsRequired()
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Subtotal)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("subtotal");
@@ -125,10 +121,7 @@ public partial class SmakchetContext : DbContext
             entity.Property(e => e.Total)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("total");
-            entity.Property(e => e.Type)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("type");
+            entity.Property(e => e.Type).HasColumnName("type");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -143,6 +136,10 @@ public partial class SmakchetContext : DbContext
         modelBuilder.Entity<OrderItem>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__OrderIte__3213E83F1A5FD512");
+
+            entity.HasIndex(e => e.OrderId, "IX_OrderItems_OrderId");
+
+            entity.HasIndex(e => e.ProductId, "IX_OrderItems_ProductId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
@@ -159,14 +156,12 @@ public partial class SmakchetContext : DbContext
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ProductName)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("product_name");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
-            entity.Property(e => e.Size)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("size");
+            entity.Property(e => e.Size).HasColumnName("size");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.OrderId)

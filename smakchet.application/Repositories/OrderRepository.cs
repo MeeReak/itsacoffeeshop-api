@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using smakchet.application.Interfaces.IOrder;
 using smakchet.dal.Models;
-using System.Threading;
 
 namespace smakchet.application.Repositories;
 
@@ -13,5 +12,12 @@ public class OrderRepository(SmakchetContext context) : BaseRepository<Order>(co
             .FirstOrDefaultAsync(c => c.Number == number, cancellationToken);
     }
 
-    p
+    public async Task<Order?> GetOrderWithItemsAsync(
+        int orderId,
+        CancellationToken ct)
+    {
+        return await context.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == orderId, ct);
+    }
 }

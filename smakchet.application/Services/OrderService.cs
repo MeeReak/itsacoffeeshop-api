@@ -11,62 +11,38 @@ using smakchet.application.Exceptions;
 using smakchet.application.Helpers;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.IOrder;
+using smakchet.application.Interfaces.IProduct;
 using smakchet.dal.Models;
 
 namespace smakchet.application.Services
 {
     public class OrderService(
-        IOrderRepository repository,
+        IOrderRepository orderRepository,
+        IProductRepository productRepository,
         IMapper<Order, OrderReadDto, OrderDto, OrderUpdateDto> orderMapper,
         IMapper<OrderItem, OrderItemReadDto, OrderItemDto, OrderItemUpdateDto> orderItemMapper,
         ILogger<OrderService> logger,
         IHttpContextAccessor contextAccessor) : IOrderService
     {
-        private void Recalculate(Order order, OrderItemSizeEnum size)
-        {
-            switch (size)
-            {
-                case OrderItemSizeEnum.Small:
-                    // apply small logic
-                    break;
-
-                case OrderItemSizeEnum.Medium:
-                    // apply medium logic
-                    break;
-
-                case OrderItemSizeEnum.Large:
-                    // apply large logic
-                    break;
-            }
-
-            order.Subtotal = order.OrderItems.Sum(i => i.Price * i.Quantity);
-            order.Total = order.Subtotal;
-            order.UpdatedAt = DateTime.UtcNow;
-        }
-
-
-
-
-
         public async Task<OrderReadDto> CreateOrderAsync(OrderDto orderDto, CancellationToken cancellationToken)
         {
-            var existing = await repository.Query()
+            var existing = await orderRepository.Query()
                 .Where(o => o.Number == orderDto.Number
-                            && o.CreatedAt!.Value.Date == DateTime.Today)
+                            && o.CreatedAt!.Date == DateTime.Today)
                 .FirstOrDefaultAsync(cancellationToken);
             if (existing != null)
             {
-                logger.LogError(ErrorMessageConstants.AlreadyExists, "Order", orderDto.Number);
+                logger.LogError(ErrorMessageConstants.AlreadyExists, "Order", existing.Number);
                 throw new DuplicateException(
-                    string.Format(ErrorMessageConstants.AlreadyExists, "Order", orderDto.Number),
+                    string.Format(ErrorMessageConstants.AlreadyExists, "Order", existing.Number),
                     ErrorCodeConstants.Conflict);
             }
 
             try
             {
                 var mapped = orderMapper.ToEntity(orderDto);
-                await repository.AddAsync(mapped, cancellationToken);
-                await repository.SaveChangesAsync(cancellationToken);
+                await orderRepository.AddAsync(mapped, cancellationToken);
+                await orderRepository.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "Order");
                 return orderMapper.ToReadDto(mapped);
             }
@@ -81,7 +57,7 @@ namespace smakchet.application.Services
 
         public async Task DeleteOrderAsync(int orderId, CancellationToken cancellationToken)
         {
-            var existing = await repository.GetByIdAsync(orderId, cancellationToken);
+            var existing = await orderRepository.GetByIdAsync(orderId, cancellationToken);
             if (existing == null)
             {
                 logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
@@ -91,7 +67,7 @@ namespace smakchet.application.Services
           
             try
             {
-                await repository.DeleteAsync(existing, cancellationToken);
+                await orderRepository.DeleteAsync(existing, cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Deleted, "Order");
             }
             catch (Exception ex)
@@ -105,7 +81,7 @@ namespace smakchet.application.Services
 
         public async Task<OrderReadDto?> GetOrderByIdAsync(int orderId, CancellationToken cancellationToken)
         {
-            var existing = await repository.GetByIdAsync(orderId, cancellationToken);
+            var existing = await orderRepository.GetByIdAsync(orderId, cancellationToken);
             if (existing == null)
             {
                 logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
@@ -121,7 +97,7 @@ namespace smakchet.application.Services
 
         public async Task<ResponsePagingDto<OrderReadDto>> GetOrderPagedAsync(PaginationQueryParams param)
         {
-            IQueryable<Order> query = repository.Query()
+            IQueryable<Order> query = orderRepository.Query()
                 .AsNoTracking()
                 .Include(o => o.OrderItems);
 
@@ -146,10 +122,9 @@ namespace smakchet.application.Services
 
 
 
-
         public async Task<OrderReadDto?> UpdateOrderAsync(int orderId, OrderUpdateDto orderDto, CancellationToken cancellationToken)
         {
-            var existing = await repository.GetByIdAsync(orderId, cancellationToken);
+            var existing = await orderRepository.GetByIdAsync(orderId, cancellationToken);
             if (existing == null)
             {
                 logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
@@ -160,7 +135,7 @@ namespace smakchet.application.Services
             try
             {
                 orderMapper.UpdateEntity(existing, orderDto);
-                await repository.UpdateAsync(existing, cancellationToken);
+                await orderRepository.UpdateAsync(existing, cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Updated, "Order");
                 return orderMapper.ToReadDto(existing);
             }
@@ -173,38 +148,109 @@ namespace smakchet.application.Services
 
 
 
-        public async Task AddItemAsync(int orderId, OrderItemDto itemDto, CancellationToken cancellationToken)
+        public void Recalculate(Order order)
         {
-            var order = await repository.GetOrderWithItemsAsync(orderId, cancellationToken);
-            if (order == null)
+            decimal subtotal = 0;
+
+            foreach (var item in order.OrderItems)
             {
-                logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
-                throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
+                decimal unitPrice = item.Size switch
+                {
+                    (int)OrderItemSizeEnum.Small => item.Price,
+                    (int)OrderItemSizeEnum.Medium => item.Price + 1m,
+                    (int)OrderItemSizeEnum.Large => item.Price + 2m,
+                    _ => item.Price
+                };
+
+                subtotal += unitPrice * item.Quantity;
+            }
+
+            decimal taxRate = 0;
+            decimal tax = subtotal * taxRate;
+
+            order.Subtotal = subtotal;
+            order.Total = subtotal + tax;
+            order.UpdatedAt = DateTime.UtcNow;
+        }
+
+
+
+
+        public async Task AddItemAsync(int orderId, OrderItemDto itemDto, CancellationToken ct)
+        {
+            var product = await productRepository.GetByIdAsync(itemDto.ProductId, ct);
+            if (product == null)
+            {
+                logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Product", itemDto.ProductId);
+                throw new NotFoundException(
+                    string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", itemDto.ProductId),
                     ErrorCodeConstants.NotFound);
             }
 
-            if (order.Status != OrderStatusEnum.Pending.ToString())
+            var order = await orderRepository.GetOrderWithItemsAsync(orderId, ct);
+            if (order == null)
+            {
+                logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
+                throw new NotFoundException(
+                    string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
+                    ErrorCodeConstants.NotFound);
+            }
+
+            if (order.Status != (int)OrderStatusEnum.Pending)
                 throw new BadRequestException("Order is not open");
 
-
             var existingItem = order.OrderItems
-                .FirstOrDefault(i => i.ProductId == itemDto.ProductId && i.Size == itemDto.Size);
+                .FirstOrDefault(i => i.ProductId == itemDto.ProductId && i.Size == (int)itemDto.Size);
 
             if (existingItem != null)
             {
-                existingItem.Quantity += itemDto.Quantity;
+                var newQty = existingItem.Quantity + itemDto.Quantity;
+                if (newQty > 10)  
+                    throw new BadRequestException("Max quantity per item is 10");
+
+                existingItem.Quantity = newQty;
+                existingItem.Note = itemDto.Note;  
             }
             else
             {
-                var orderItem = orderItemMapper.ToEntity(itemDto);
-                order.OrderItems.Add(orderItem);
+                var mapped = orderItemMapper.ToEntity(itemDto);
+                order.OrderItems.Add(mapped);
             }
 
             Recalculate(order);
 
-            await repository.SaveChangesAsync(cancellationToken);
+            await orderRepository.SaveChangesAsync(ct);
 
             logger.LogInformation("Item added to order {OrderId}", orderId);
+        }
+
+
+
+
+        public async Task RemoveItemAsync(int orderId, int itemId, CancellationToken ct)
+        {
+            var order = await orderRepository.GetOrderWithItemsAsync(orderId, ct);
+            if (order == null)
+                throw new NotFoundException(
+                    string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
+                    ErrorCodeConstants.NotFound);
+
+            if (order.Status != (int)OrderStatusEnum.Pending)
+                throw new BadRequestException("Order is not open");
+
+            var item = order.OrderItems.FirstOrDefault(i => i.Id == itemId);
+            if (item == null)
+                throw new NotFoundException(
+                    string.Format(ErrorMessageConstants.ResourceNotFoundById, "Item", itemId),
+                    ErrorCodeConstants.NotFound);
+
+            order.OrderItems.Remove(item);
+
+            Recalculate(order);
+
+            await orderRepository.SaveChangesAsync(ct);
+
+            logger.LogInformation("Item removed from order {OrderId}", orderId);
         }
     }
 }
