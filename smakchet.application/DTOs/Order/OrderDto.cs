@@ -1,35 +1,29 @@
-﻿using smakchet.application.Constants.Order;
+﻿using smakchet.application.Constants.Enum;
+using smakchet.application.Constants.Order;
 using smakchet.application.Validation;
 using System.ComponentModel.DataAnnotations;
-using smakchet.application.Constants.Enum;
+using System.Text.Json.Serialization;
 
 namespace smakchet.application.DTOs.Order
 {
     public class OrderDto
     {
-        [Required(ErrorMessage = OrderMessageConstant.RequiredNumber)]
-        public int Number { get; set; }
-
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
         [OrderTypeValidation]
         public OrderTypeEnum Type { get; set; }
 
-        [Required(ErrorMessage = OrderMessageConstant.RequiredStatus)]
-        [OrderStatusValidation]
-        public OrderStatusEnum Status { get; set; }
-
-        [Required(ErrorMessage = OrderMessageConstant.RequiredSubtotal)]
-        [RegularExpression(@"^\d{1,5}$|(?=^.{1,5}$)^\d+\.\d{0,2}$", ErrorMessage = OrderMessageConstant.InvalidSubtotal)]
-        public decimal Subtotal { get; set; }
-
-        [Required(ErrorMessage = OrderMessageConstant.RequiredTax)]
-        [RegularExpression(@"^\d{1,5}$|(?=^.{1,5}$)^\d+\.\d{0,2}$", ErrorMessage = OrderMessageConstant.InvalidTax)]
-        public decimal Tax { get; set; }
-
-        [Required(ErrorMessage = OrderMessageConstant.RequiredTotal)]
-        [RegularExpression(@"^\d{1,5}$|(?=^.{1,5}$)^\d+\.\d{0,2}$", ErrorMessage = OrderMessageConstant.InvalidTotal)]
-        public decimal Total { get; set; }
 
         public int CashierId { get; set; }
+    }
+
+
+
+    public class OrderStatusDto
+    {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
+        [OrderTypeValidation]
+        public OrderStatusEnum Status { get; set; }
     }
 }

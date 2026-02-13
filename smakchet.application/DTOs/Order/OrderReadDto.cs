@@ -6,7 +6,7 @@ namespace smakchet.application.DTOs.Order
     public class OrderReadDto
     {
         public int Id { get; set; }
-        public int Number { get; set; }
+        public string Number { get; set; } = string.Empty;
         public OrderTypeEnum Type { get; set; } 
         public OrderStatusEnum Status { get; set; } 
         public decimal Subtotal { get; set; }

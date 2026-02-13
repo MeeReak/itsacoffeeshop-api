@@ -3,7 +3,8 @@ using smakchet.dal.Models;
 
 namespace smakchet.application.Interfaces.IOrderItem
 {
-    public interface IOrderItemMapper : IMapper<OrderItem, OrderItemReadDto, OrderItemDto, OrderItemUpdateDto>
+    public interface IOrderItemMapper
     {
+        OrderItemReadDto ToReadDto(OrderItem entity);
     }
 }

@@ -35,7 +35,6 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IProductService, ProductService>();
 
         services.AddScoped<IMapper<Order, OrderReadDto, OrderDto, OrderUpdateDto>, OrderMapper>();
-        services.AddScoped<IMapper<OrderItem, OrderItemReadDto, OrderItemDto, OrderItemUpdateDto>, OrderItemMapper>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderService, OrderService>();
 

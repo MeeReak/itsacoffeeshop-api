@@ -15,21 +15,62 @@ namespace smakchet.api.Controllers.V2026_01_01
     [ApiController]
     public class OrderController(IOrderService service) : ControllerBase
     {
-        [HttpPost("{orderId:int}/add")]
+        [HttpGet("{orderId:int}/items")]
+        [ProducesResponseType(typeof(OrderItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAllOrderItem([FromRoute] int orderId, [FromRoute] int itemId, CancellationToken cancellationToken)
+        {
+            var order = await service.GetOrderItemByIdAsync(orderId, cancellationToken);
+            return StatusCode(StatusCodes.Status200OK, order);
+        }
+
+
+        [HttpDelete("{orderId:int}/items/{itemId:int}")]
+        [ProducesResponseType(typeof(OrderItemDto), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RemoveOrderItem([FromRoute] int orderId, [FromRoute] int itemId, CancellationToken cancellationToken)
+        {
+            await service.RemoveItemAsync(orderId, itemId, cancellationToken);
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+
+
+        [HttpPatch("{orderId:int}/items/{itemId:int}")]
+        [ProducesResponseType(typeof(OrderItemDto), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateOrderItem([FromRoute] int orderId, [FromRoute] int itemId, [FromBody] OrderItemUpdateDto itemDto, CancellationToken cancellationToken)
+        {
+            await service.UpdateItemAsync(orderId, itemId, itemDto, cancellationToken);
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+
+
+        [HttpPatch("{orderId:int}/items/status")]
+        [ProducesResponseType(typeof(OrderItemDto), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateStatusOrder([FromRoute] int orderId, [FromRoute] int itemId, [FromBody] OrderItemUpdateDto itemDto, CancellationToken cancellationToken)
+        {
+            await service.UpdateItemAsync(orderId, itemId, itemDto, cancellationToken);
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+
+
+        [HttpPatch("{orderId:int}/status")]
+        [ProducesResponseType(typeof(OrderItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateStatusOrder([FromRoute] int orderId, [FromBody] OrderStatusDto status, CancellationToken cancellationToken)
+        {
+            var order = await service.UpdateStatueOrderAsync(orderId, status, cancellationToken);
+            return StatusCode(StatusCodes.Status200OK, order);
+        }
+
+
+        [HttpPost("{orderId:int}")]
         [ProducesResponseType(typeof(OrderItemDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddOrderItem([FromRoute] int orderId, [FromBody] OrderItemDto orderDto, CancellationToken cancellationToken)
         {
             await service.AddItemAsync(orderId, orderDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created);
-        }
-
-        [HttpPost("{orderId:int}/remove/{itemId:int}")]
-        [ProducesResponseType(typeof(OrderItemDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RemoveOrderItem([FromRoute] int orderId, [FromRoute] int itemId, CancellationToken cancellationToken)
-        {
-            await service.RemoveItemAsync(orderId, itemId, cancellationToken);
             return StatusCode(StatusCodes.Status201Created);
         }
 
@@ -50,8 +91,8 @@ namespace smakchet.api.Controllers.V2026_01_01
         public async Task<IActionResult> GetOrder(int orderId, CancellationToken cancellationToken)
         {
 
-            var Order = await service.GetOrderByIdAsync(orderId, cancellationToken);
-            return StatusCode(StatusCodes.Status200OK, Order);
+            var order = await service.GetOrderByIdAsync(orderId, cancellationToken);
+            return StatusCode(StatusCodes.Status200OK, order);
         }
 
 
@@ -60,8 +101,8 @@ namespace smakchet.api.Controllers.V2026_01_01
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SaveOrder([FromBody] OrderDto orderDto, CancellationToken cancellationToken)
         {
-            var Order = await service.CreateOrderAsync(orderDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created, Order);
+            var order = await service.CreateOrderAsync(orderDto, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, order);
         }
 
 
@@ -70,8 +111,8 @@ namespace smakchet.api.Controllers.V2026_01_01
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateOrder(int orderId, OrderUpdateDto orderDto, CancellationToken cancellationToken)
         {
-            var Order = await service.UpdateOrderAsync(orderId, orderDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created, Order);
+            var order = await service.UpdateOrderAsync(orderId, orderDto, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, order);
         }
 
 

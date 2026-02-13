@@ -15,7 +15,6 @@ namespace smakchet.application.Mappings
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Profile = user.Profile,
-                CreatedDate = user.CreatedAt
             };
         }
 

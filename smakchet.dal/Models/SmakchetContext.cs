@@ -110,7 +110,11 @@ public partial class SmakchetContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.Number).HasColumnName("number");
+            entity.Property(e => e.Number)
+                .IsRequired()
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("number");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Subtotal)
                 .HasColumnType("decimal(10, 2)")

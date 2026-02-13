@@ -12,12 +12,7 @@ namespace smakchet.application.Mappings
         {
             return new Order
             {
-                Number = dto.Number,
                 Type = (int)dto.Type,
-                Status = (int)dto.Status,
-                Subtotal = dto.Subtotal,
-                Total = dto.Total,
-                Tax = dto.Tax,
                 CashierId = dto.CashierId
             };
         }
@@ -52,11 +47,7 @@ namespace smakchet.application.Mappings
 
         public void UpdateEntity(Order entity, OrderUpdateDto dto)
         {
-            entity.Status = (int)dto.Status;
             entity.Type = (int)dto.Type;
-            entity.Tax = dto.Tax;
-            entity.Subtotal = dto.Subtotal;
-            entity.Total = dto.Total;
             entity.UpdatedAt = DateTime.Now;
         }
     }
