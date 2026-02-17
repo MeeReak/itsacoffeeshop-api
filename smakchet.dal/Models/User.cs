@@ -27,7 +27,9 @@ public partial class User
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual ICollection<OrderStatusLog> OrderStatusLogs { get; set; } = new List<OrderStatusLog>();
+    public virtual ICollection<OrderStatusLog> OrderStatusLogCashiers { get; set; } = new List<OrderStatusLog>();
+
+    public virtual ICollection<OrderStatusLog> OrderStatusLogChangedByNavigations { get; set; } = new List<OrderStatusLog>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 

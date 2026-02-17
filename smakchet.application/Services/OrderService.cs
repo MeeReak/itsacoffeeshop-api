@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using smakchet.application.Constants;
 using smakchet.application.Constants.Enum;
+using smakchet.application.Constants.Order;
 using smakchet.application.DTOs;
 using smakchet.application.DTOs.Order;
 using smakchet.application.DTOs.OrderItem;
@@ -40,6 +41,14 @@ public class OrderService(
             await orderRepository.SaveChangesAsync(cancellationToken);
 
             order.Number = $"ORD-{order.Id:D6}";
+            var orderStatusLog = new OrderStatusLog
+            {
+                Order = order,
+                OldStatus = order.Status,
+                CashierId = order.CashierId
+            };
+
+            order.OrderStatusLogs.Add(orderStatusLog);
             await orderRepository.SaveChangesAsync(cancellationToken);
 
             return orderMapper.ToReadDto(order);
@@ -177,8 +186,7 @@ public class OrderService(
         logger.LogInformation(SuccessMessageConstants.Retrieved, "Order");
         return result;
     }
-
-
+    
 
     public async Task AddItemAsync(int orderId, OrderItemDto itemDto, CancellationToken ct)
     {
@@ -222,8 +230,7 @@ public class OrderService(
         await orderRepository.SaveChangesAsync(ct);
     }
 
-
-
+    
     public async Task RemoveItemAsync(int orderId, int itemId, CancellationToken cancellationToken)
     {
         var order = await orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
@@ -233,7 +240,7 @@ public class OrderService(
                 ErrorCodeConstants.NotFound);
 
         if (order.Status != (int)OrderStatusEnum.Pending)
-            throw new BadRequestException("Order is not open");
+            throw new BadRequestException(OrderMessageConstant.NotOpen);
 
         var item = order.OrderItems.FirstOrDefault(i => i.Id == itemId);
         if (item == null)
@@ -263,7 +270,7 @@ public class OrderService(
         }
 
         if (order.Status != (int)OrderStatusEnum.Pending)
-            throw new BadRequestException("Order is not open");
+            throw new BadRequestException(OrderMessageConstant.NotOpen);
 
         var item = order.OrderItems.FirstOrDefault(i => i.Id == itemId);
         if (item == null)
@@ -288,32 +295,51 @@ public class OrderService(
     }
 
 
-
     public async Task<OrderReadDto?> UpdateStatueOrderAsync(int orderId, OrderStatusDto statusDto, CancellationToken cancellationToken)
     {
         var existing = await orderRepository.GetByIdAsync(orderId, cancellationToken);
+
         if (existing == null)
         {
             logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
-            throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
+            throw new NotFoundException(
+                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
                 ErrorCodeConstants.NotFound);
         }
 
         try
         {
-            _ = existing.Status == (int)statusDto.Status;
-            await orderRepository.UpdateAsync(existing, cancellationToken);
+            var newStatus = (int)statusDto.Status;
+            if (existing.Status == newStatus)
+                return orderMapper.ToReadDto(existing);
+
+            var oldStatus = existing.Status;
+
+            existing.Status = newStatus;
+
+            var statusLog = new OrderStatusLog
+            {
+                OrderId = existing.Id,
+                OldStatus = oldStatus,
+                NewStatus = newStatus,
+                ChangedBy = existing.CashierId,
+                CashierId = existing.CashierId,
+                UpdatedAt = DateTime.Now
+            };
+
+            existing.OrderStatusLogs.Add(statusLog);
+
             await orderRepository.SaveChangesAsync(cancellationToken);
+
+            logger.LogInformation("Order {OrderId} status updated from {Old} to {New}",
+                orderId, oldStatus, newStatus);
+
             return orderMapper.ToReadDto(existing);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            logger.LogError(ex, ErrorMessageConstants.OperationFailed, "UpdateStatueOrder");
             throw;
         }
-
-        var result = orderMapper.ToReadDto(existing);
-        logger.LogInformation(SuccessMessageConstants.Retrieved, "Order");
-        return result;
     }
 }

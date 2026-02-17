@@ -11,13 +11,19 @@ public partial class OrderStatusLog
 
     public int OrderId { get; set; }
 
-    public string OldStatus { get; set; }
+    public int? OldStatus { get; set; }
 
-    public string NewStatus { get; set; }
+    public int? NewStatus { get; set; }
 
     public int? ChangedBy { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public int CashierId { get; set; }
+
+    public virtual User Cashier { get; set; }
 
     public virtual User ChangedByNavigation { get; set; }
 

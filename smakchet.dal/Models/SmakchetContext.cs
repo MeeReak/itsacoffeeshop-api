@@ -111,7 +111,6 @@ public partial class SmakchetContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.Number)
-                .IsRequired()
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("number");
@@ -182,22 +181,25 @@ public partial class SmakchetContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__OrderSta__3213E83FE4792F38");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CashierId).HasColumnName("cashier_id");
             entity.Property(e => e.ChangedBy).HasColumnName("changed_by");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.NewStatus)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("new_status");
-            entity.Property(e => e.OldStatus)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("old_status");
+            entity.Property(e => e.NewStatus).HasColumnName("new_status");
+            entity.Property(e => e.OldStatus).HasColumnName("old_status");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
 
-            entity.HasOne(d => d.ChangedByNavigation).WithMany(p => p.OrderStatusLogs)
+            entity.HasOne(d => d.Cashier).WithMany(p => p.OrderStatusLogCashiers)
+                .HasForeignKey(d => d.CashierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_orderstatuslogs_user");
+
+            entity.HasOne(d => d.ChangedByNavigation).WithMany(p => p.OrderStatusLogChangedByNavigations)
                 .HasForeignKey(d => d.ChangedBy)
                 .HasConstraintName("fk_statuslogs_users");
 

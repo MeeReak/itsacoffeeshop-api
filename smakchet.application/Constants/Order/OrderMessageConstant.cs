@@ -8,7 +8,7 @@
         public const string RequiredTax = "Name is required.";
         public const string RequiredSubtotal = "Subtotal is required.";
         public const string RequiredTotal = "Total is required.";
-
+        
         public const string RequiredProductName = "ProductName is required.";
         public const string RequiredProductId = "ProductId is required.";
         public const string RequiredQuantity = "Quantity is required.";
@@ -23,5 +23,7 @@
 
         public const string InvalidPrice = "Price must be a valid decimal.";
         public const string InvalidQuantity = "Quantity must be a valid integer.";
+
+        public const string NotOpen = "Order is not open yet.";
     }
 }
