@@ -1,12 +1,12 @@
 ﻿using smakchet.api.Filter;
 using smakchet.application.DTOs.Category;
 using smakchet.application.DTOs.Order;
-using smakchet.application.DTOs.OrderItem;
 using smakchet.application.DTOs.Product;
 using smakchet.application.DTOs.User;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.ICategory;
 using smakchet.application.Interfaces.IOrder;
+using smakchet.application.Interfaces.IPayment;
 using smakchet.application.Interfaces.IProduct;
 using smakchet.application.Interfaces.IUser;
 using smakchet.application.Mappings;
@@ -38,6 +38,8 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderService, OrderService>();
 
+        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<ApiDeprecateActionFilter>();
         return services;
     }

@@ -11,11 +11,11 @@ public partial class Payment
 
     public int OrderId { get; set; }
 
-    public string Method { get; set; }
+    public int? Method { get; set; }
 
     public decimal? Amount { get; set; }
 
-    public string Status { get; set; }
+    public int? Status { get; set; }
 
     public string ReferenceCode { get; set; }
 

@@ -16,14 +16,4 @@ namespace smakchet.application.DTOs.Order
 
         public int CashierId { get; set; }
     }
-
-
-
-    public class OrderStatusDto
-    {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
-        [OrderStatusValidation]
-        public OrderStatusEnum Status { get; set; }
-    }
 }

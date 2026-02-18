@@ -6,12 +6,6 @@ namespace smakchet.application.Repositories;
 
 public class OrderRepository(SmakchetContext context) : BaseRepository<Order>(context), IOrderRepository
 {
-    public async Task<Order?> GetByNumberAsync(string number, CancellationToken cancellationToken)
-    {
-        return await context.Orders
-            .FirstOrDefaultAsync(c => c.Number == number, cancellationToken);
-    }
-
     public async Task<Order?> GetOrderWithItemsAsync(
         int orderId,
         CancellationToken ct)

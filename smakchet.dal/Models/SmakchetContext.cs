@@ -222,10 +222,7 @@ public partial class SmakchetContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.Method)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("method");
+            entity.Property(e => e.Method).HasColumnName("method");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.PaidAt)
                 .HasColumnType("datetime")
@@ -234,10 +231,7 @@ public partial class SmakchetContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("reference_code");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("status");
+            entity.Property(e => e.Status).HasColumnName("status");
 
             entity.HasOne(d => d.Cashier).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.CashierId)
