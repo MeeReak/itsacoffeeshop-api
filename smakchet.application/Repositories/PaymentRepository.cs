@@ -15,4 +15,12 @@ public class PaymentRepository(SmakchetContext context) : BaseRepository<Payment
             .OrderByDescending(p => p.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    public async Task<Payment?> GetPaymentOrderByIdAsync(
+        int paymentId,
+        CancellationToken cancellationToken)
+    {
+        return await context.Payments.Include(p => p.Order)
+            .FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
+    }
 }

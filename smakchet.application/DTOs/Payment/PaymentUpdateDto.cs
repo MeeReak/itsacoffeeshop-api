@@ -2,7 +2,6 @@
 {
     public class PaymentUpdateDto
     {
-
         public int Method { get; set; }
     }
 }

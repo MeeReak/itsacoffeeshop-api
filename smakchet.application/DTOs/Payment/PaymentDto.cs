@@ -1,10 +1,21 @@
 ﻿using Newtonsoft.Json;
+using smakchet.application.Constants.Enum;
+using smakchet.application.Constants.Order;
+using smakchet.application.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace smakchet.application.DTOs.Payment
 {
     public class PaymentDto
     {
-        public int Method { get; set; }
+        [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
+        [EnumValidation(typeof(PaymentMethodEnum))]
+        public PaymentMethodEnum? Method { get; set; }
+
+
+        [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
+        [EnumValidation(typeof(KHQRCurrencyEnum))]
+        public KHQRCurrencyEnum? Currency { get; set; }
     }
 
 
@@ -15,16 +26,33 @@ namespace smakchet.application.DTOs.Payment
     }
 
 
+    public class BakongKHQRData
+    {
+        [JsonProperty("MD5")]
+        public string Md5 { get; set; } = string.Empty;
+
+
+        [JsonProperty("QR")]
+        public string Qr { get; set; } = string.Empty;
+
+    }
+
+
     public class BakongKHQRResponse
     {
         [JsonProperty("responseCode")]
         public int ResponseCode { get; set; }
 
 
+        [JsonProperty("errorCode")]
+        public int ErrorCode { get; set; }
+
+
         [JsonProperty("responseMessage")]
         public string ResponseMessage { get; set; } = string.Empty;
 
 
+        [JsonProperty("data")]
         public BakongData? Data { get; set; }
     }
 

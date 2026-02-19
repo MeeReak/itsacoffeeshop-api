@@ -45,12 +45,12 @@ namespace smakchet.api.Controllers.V2026_01_01
         }
 
 
-        [HttpPatch("{orderId:int}/status")]
+        [HttpGet("{orderId:int}/status")]
         [ProducesResponseType(typeof(OrderReadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateStatusOrder([FromRoute] int orderId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetStatueOrder([FromRoute] int orderId, CancellationToken cancellationToken)
         {
-            var order = await service.GetStatueOrderAsync(orderId, cancellationToken);
+            var order = await service.GetStatusOrderAsync(orderId, cancellationToken);
             return StatusCode(StatusCodes.Status200OK, order);
         }
 
