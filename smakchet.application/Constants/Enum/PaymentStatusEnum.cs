@@ -1,8 +1,9 @@
 ﻿namespace smakchet.application.Constants.Enum
 {
-    public enum PaidMethodEnum
+    public enum PaymemtStatusEnum
     {
-        Cash,
-        Qr
+        Pending,
+        Success,
+        Failed
     }
 }

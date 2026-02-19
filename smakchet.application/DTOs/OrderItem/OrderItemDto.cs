@@ -19,7 +19,7 @@ namespace smakchet.application.DTOs.OrderItem
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         [Required(ErrorMessage = OrderMessageConstant.RequiredSize)]
-        [OrderItemSizeValidation]
+        [EnumValidation(typeof(OrderItemSizeEnum))]
         public OrderItemSizeEnum Size { get; set; }
 
 

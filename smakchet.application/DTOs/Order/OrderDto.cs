@@ -10,7 +10,7 @@ namespace smakchet.application.DTOs.Order
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
         [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
-        [OrderTypeValidation]
+        [EnumValidation(typeof(OrderTypeEnum))]
         public OrderTypeEnum Type { get; set; }
 
 
