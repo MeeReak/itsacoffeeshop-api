@@ -1,5 +1,4 @@
-﻿using smakchet.application.Constants.Enum;
-using smakchet.application.DTOs.OrderItem;
+﻿using smakchet.application.DTOs.OrderItem;
 
 namespace smakchet.application.DTOs.Order
 {
@@ -7,8 +6,8 @@ namespace smakchet.application.DTOs.Order
     {
         public int Id { get; set; }
         public string Number { get; set; } = string.Empty;
-        public OrderTypeEnum Type { get; set; } 
-        public OrderStatusEnum Status { get; set; } 
+        public int Type { get; set; } 
+        public int Status { get; set; } 
         public decimal Subtotal { get; set; }
         public decimal Tax { get; set; }
         public decimal Total { get; set; }

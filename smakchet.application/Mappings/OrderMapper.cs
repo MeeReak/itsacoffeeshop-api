@@ -1,5 +1,4 @@
-﻿using smakchet.application.Constants.Enum;
-using smakchet.application.DTOs.Order;
+﻿using smakchet.application.DTOs.Order;
 using smakchet.application.DTOs.OrderItem;
 using smakchet.application.Interfaces.IOrder;
 using smakchet.dal.Models;
@@ -12,7 +11,7 @@ namespace smakchet.application.Mappings
         {
             return new Order
             {
-                Type = (int)dto.Type,
+                Type = (int)dto.Type!,
                 CashierId = dto.CashierId
             };
         }
@@ -23,8 +22,8 @@ namespace smakchet.application.Mappings
             {
                 Id = entity.Id,
                 Number = entity.Number,
-                Status = (OrderStatusEnum)entity.Status,
-                Type = (OrderTypeEnum)entity.Type,
+                Status = entity.Status,
+                Type = entity.Type,
                 Tax = entity.Tax,
                 Subtotal = entity.Subtotal,
                 CashierId = entity.CashierId,
@@ -38,7 +37,7 @@ namespace smakchet.application.Mappings
                         ProductName = item.ProductName,
                         Quantity = item.Quantity,
                         Price = item.Price,
-                        Size = (OrderItemSizeEnum)item.Size,
+                        Size = item.Size,
                         Note = item.Note
                     })
                     .ToList()
@@ -47,7 +46,7 @@ namespace smakchet.application.Mappings
 
         public void UpdateEntity(Order entity, OrderUpdateDto dto)
         {
-            entity.Type = (int)dto.Type;
+            entity.Type = (int)dto.Type!;
             entity.UpdatedAt = DateTime.Now;
         }
     }

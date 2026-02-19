@@ -11,19 +11,21 @@ public partial class Payment
 
     public int OrderId { get; set; }
 
-    public int? Method { get; set; }
+    public int Method { get; set; }
 
-    public decimal? Amount { get; set; }
+    public decimal Amount { get; set; }
 
-    public int? Status { get; set; }
+    public int Status { get; set; }
 
     public string ReferenceCode { get; set; }
 
     public int CashierId { get; set; }
 
-    public DateTime? PaidAt { get; set; }
+    public DateTime ExpiredAt { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? PaidAt { get; set; }
 
     public virtual User Cashier { get; set; }
 

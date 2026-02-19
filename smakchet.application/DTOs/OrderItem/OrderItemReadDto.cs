@@ -1,6 +1,4 @@
-﻿using smakchet.application.Constants.Enum;
-
-namespace smakchet.application.DTOs.OrderItem
+﻿namespace smakchet.application.DTOs.OrderItem
 {
     public class OrderItemReadDto
     {
@@ -9,7 +7,7 @@ namespace smakchet.application.DTOs.OrderItem
         public string ProductName { get; set; } = null!;
         public decimal Price { get; set; }
         public int Quantity { get; set; }
-        public OrderItemSizeEnum Size { get; set; }
+        public int Size { get; set; }
         public string? Note { get; set; }
     }
 }

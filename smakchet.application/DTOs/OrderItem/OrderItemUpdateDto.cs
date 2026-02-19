@@ -1,5 +1,5 @@
 ﻿using smakchet.application.Constants.Enum;
-using System.Text.Json.Serialization;
+using smakchet.application.Validation;
 
 namespace smakchet.application.DTOs.OrderItem
 {
@@ -8,8 +8,8 @@ namespace smakchet.application.DTOs.OrderItem
 
         public int Quantity { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public OrderItemSizeEnum Size { get; set; }
+        [EnumValidation(typeof(OrderItemSizeEnum))]
+        public OrderItemSizeEnum? Size { get; set; }
 
         public string Note { get; set; } = string.Empty;
     }

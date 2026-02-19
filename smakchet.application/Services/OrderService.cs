@@ -32,7 +32,7 @@ public class OrderService(
         {
             var order = new Order
             {
-                Type = (int)orderDto.Type,
+                Type = (int)orderDto.Type!,
                 Status = (int)OrderStatusEnum.Pending,
                 Subtotal = 0,
                 Tax = 0,
@@ -206,7 +206,7 @@ public class OrderService(
 
         var existingItem = order.OrderItems
             .FirstOrDefault(i => i.ProductId == itemDto.ProductId
-                                 && i.Size == (int)itemDto.Size);
+                                 && i.Size == (int)itemDto.Size!);
 
         if (existingItem != null)
         {
@@ -220,7 +220,7 @@ public class OrderService(
                 ProductName = product.Name,
                 Price = product.Price,
                 Quantity = itemDto.Quantity,
-                Size = (int)itemDto.Size,
+                Size = (int)itemDto.Size!,
                 Note = itemDto.Note,
                 CreatedAt = DateTime.UtcNow
             };
@@ -290,7 +290,7 @@ public class OrderService(
 
         item.Quantity = itemDto.Quantity;
         item.Note = itemDto.Note;
-        item.Size = (int)itemDto.Size;
+        item.Size = (int)itemDto.Size!;
 
         Recalculate(order);
 
@@ -299,62 +299,54 @@ public class OrderService(
     }
 
 
-    public async Task<OrderReadDto?> GetStatueOrderAsync(int orderId, CancellationToken cancellationToken)
+    public async Task<OrderReadDto?> GetStatusOrderAsync(int orderId, CancellationToken cancellationToken)
     {
-        var existing = await orderRepository.GetByIdAsync(orderId, cancellationToken);
-        if (existing == null)
-        {
-            logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
-            throw new NotFoundException(
-                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
-                ErrorCodeConstants.NotFound);
-        }
+        var order = await orderRepository.GetByIdAsync(orderId, cancellationToken)
+                    ?? throw new NotFoundException(
+                        string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
+                        ErrorCodeConstants.NotFound);
 
-
-        var payment = await paymentRepository.GetLatestPendingByOrderIdAsync(orderId, cancellationToken);
-        if (payment == null)
-        {
-            logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
-            throw new NotFoundException(
-                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
-                ErrorCodeConstants.NotFound);
-        }
-
+        var payment = await paymentRepository.GetLatestPendingByOrderIdAsync(orderId, cancellationToken)
+                      ?? throw new NotFoundException(
+                          string.Format(ErrorMessageConstants.ResourceNotFoundById, "Payment", orderId),
+                          ErrorCodeConstants.NotFound);
 
         try
         {
-            if (payment.Status == (int)PaymemtStatusEnum.Success)
+            int? newStatus = payment.Status switch
             {
-                var newStatus = (int)OrderStatusEnum.Paid;
-                if (existing.Status == newStatus)
-                    return orderMapper.ToReadDto(existing);
+                (int)PaymemtStatusEnum.Success => (int)OrderStatusEnum.Paid,
+                (int)PaymemtStatusEnum.Failed => (int)OrderStatusEnum.Canceled,
+                _ => null
+            };
 
-                var oldStatus = existing.Status;
+            if (newStatus == null || order.Status == newStatus)
+                return orderMapper.ToReadDto(order);
 
-                existing.Status = newStatus;
+            var oldStatus = order.Status;
+            order.Status = newStatus.Value;
 
-                var statusLog = new OrderStatusLog
-                {
-                    OrderId = existing.Id,
-                    OldStatus = oldStatus,
-                    NewStatus = newStatus,
-                    ChangedBy = existing.CashierId,
-                    CashierId = existing.CashierId,
-                    UpdatedAt = DateTime.Now
-                };
+            order.OrderStatusLogs.Add(new OrderStatusLog
+            {
+                OrderId = order.Id,
+                OldStatus = oldStatus,
+                NewStatus = newStatus.Value,
+                ChangedBy = order.CashierId,
+                CashierId = order.CashierId,
+                UpdatedAt = DateTime.Now
+            });
 
-                existing.OrderStatusLogs.Add(statusLog);
+            await orderRepository.SaveChangesAsync(cancellationToken);
 
-                await orderRepository.SaveChangesAsync(cancellationToken);
+            logger.LogInformation(
+                "Order {OrderId} status updated from {Old} to {New}",
+                orderId, oldStatus, newStatus.Value);
 
-                logger.LogInformation("Order {OrderId} status updated from {Old} to {New}",
-                    orderId, oldStatus, newStatus);
-            }
-            return orderMapper.ToReadDto(existing);
+            return orderMapper.ToReadDto(order);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, ErrorMessageConstants.OperationFailed, "UpdateStatueOrder");
+            logger.LogError(ex, ErrorMessageConstants.OperationFailed, "GetStatusOrderAsync");
             throw;
         }
     }

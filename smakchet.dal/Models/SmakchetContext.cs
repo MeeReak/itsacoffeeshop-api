@@ -222,12 +222,16 @@ public partial class SmakchetContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.ExpiredAt)
+                .HasColumnType("datetime")
+                .HasColumnName("expired_at");
             entity.Property(e => e.Method).HasColumnName("method");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.PaidAt)
                 .HasColumnType("datetime")
                 .HasColumnName("paid_at");
             entity.Property(e => e.ReferenceCode)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("reference_code");

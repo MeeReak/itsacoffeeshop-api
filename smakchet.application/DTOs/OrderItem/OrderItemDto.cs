@@ -1,7 +1,6 @@
 ﻿using smakchet.application.Constants.Order;
 using smakchet.application.Validation;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using smakchet.application.Constants.Enum;
 
 namespace smakchet.application.DTOs.OrderItem
@@ -17,10 +16,9 @@ namespace smakchet.application.DTOs.OrderItem
         public int Quantity { get; set; }
 
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         [Required(ErrorMessage = OrderMessageConstant.RequiredSize)]
         [EnumValidation(typeof(OrderItemSizeEnum))]
-        public OrderItemSizeEnum Size { get; set; }
+        public OrderItemSizeEnum? Size { get; set; }
 
 
         public string? Note { get; set; }
