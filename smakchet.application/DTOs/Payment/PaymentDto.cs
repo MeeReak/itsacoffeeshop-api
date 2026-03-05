@@ -21,8 +21,8 @@ namespace smakchet.application.DTOs.Payment
 
     public class CheckTransactionRequest
     {
-        [JsonProperty("md5")]
-        public string Md5 { get; set; } = string.Empty;
+        //[JsonProperty("md5")]
+        public string md5 { get; set; } = string.Empty;
     }
 
 
@@ -44,8 +44,8 @@ namespace smakchet.application.DTOs.Payment
         public int ResponseCode { get; set; }
 
 
-        [JsonProperty("errorCode")]
-        public int ErrorCode { get; set; }
+        [JsonProperty("errorCode")] 
+        public string? ErrorCode { get; set; } = string.Empty;
 
 
         [JsonProperty("responseMessage")]

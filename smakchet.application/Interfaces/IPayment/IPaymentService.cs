@@ -5,7 +5,7 @@ namespace smakchet.application.Interfaces.IPayment
     public interface IPaymentService
     {
         Task<PaymentCheckOutDto> CheckOutAsync(int orderId, PaymentDto paymentDto, CancellationToken cancellationToken);
-        Task CheckStatusAsync(int paymentId, CancellationToken cancellationToken);
+        Task<bool> CheckStatusAsync(int paymentId, CancellationToken cancellationToken);
         Task<PaymentReadDto?> GetPaymentOrderByIdAsync(int paymentId, CancellationToken cancellationToken);
         //Task<dynamic> Verification();
         //Task<dynamic> DecodeKHQR();

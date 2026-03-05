@@ -23,18 +23,20 @@ namespace smakchet.application.Services
         IMapper<Payment, PaymentReadDto, PaymentDto, PaymentUpdateDto> mapper,
         ILogger<PaymentService> logger,
         IConfiguration configuration,
-        HttpClient httpClient) : IPaymentService
+        HttpClient httpClient,
+        IBackgroundQueueService<PaymentStatusJob> backgroundQueue
+    ) : IPaymentService
     {
-        public async Task CheckStatusAsync(int orderId, CancellationToken cancellationToken)
+        public async Task<bool> CheckStatusAsync(int paymentId, CancellationToken cancellationToken)
         {
-            var payment = await paymentRepository.GetLatestPendingByOrderIdAsync(orderId, cancellationToken)
+            var payment = await paymentRepository.GetByIdAsync(paymentId, cancellationToken)
                           ?? throw new NotFoundException(
-                              string.Format(ErrorMessageConstants.ResourceNotFoundById, "Payment", orderId),
+                              string.Format(ErrorMessageConstants.ResourceNotFoundById, "Payment", paymentId),
                               ErrorCodeConstants.NotFound);
 
             if (payment.Status == (int)PaymemtStatusEnum.Success ||
                 payment.Status == (int)PaymemtStatusEnum.Failed)
-                return;
+                return true;
 
             var response = await CheckTransactionWithBakong(payment.ReferenceCode, cancellationToken);
 
@@ -44,17 +46,20 @@ namespace smakchet.application.Services
                 payment.PaidAt = DateTime.UtcNow;
 
                 await paymentRepository.SaveChangesAsync(cancellationToken);
+                logger.LogInformation(SuccessMessageConstants.Created, "CheckTransaction");
+                return true;
             }
 
             if (payment.ExpiredAt < DateTime.UtcNow)
             {
                 payment.Status = (int)PaymemtStatusEnum.Failed;
-
                 await paymentRepository.SaveChangesAsync(cancellationToken);
+                logger.LogInformation(SuccessMessageConstants.Created, "CheckTransaction");
+                return true;
             }
-            logger.LogInformation("Checking payment {ReferenceCode}", payment.ReferenceCode);
-        }
 
+            return false;
+        }
 
         //public Task<dynamic> DecodeKHQR()
         //{
@@ -94,6 +99,7 @@ namespace smakchet.application.Services
 
             await paymentRepository.AddAsync(payment, cancellationToken);
             await paymentRepository.SaveChangesAsync(cancellationToken);
+            await backgroundQueue.Enqueue(new PaymentStatusJob(payment.Id));
 
             return new PaymentCheckOutDto
             {
@@ -147,7 +153,7 @@ namespace smakchet.application.Services
                 var url = $"{configuration["Payment:BakongUrl"]}/check_transaction_by_md5";
                 var requestBody = new CheckTransactionRequest
                 {
-                    Md5 = md5
+                    md5 = md5
                 };
                 var json = JsonConvert.SerializeObject(requestBody);
                 var request = new HttpRequestMessage(HttpMethod.Post, url)

@@ -4,6 +4,7 @@ using smakchet.application.DTOs.Order;
 using smakchet.application.DTOs.Payment;
 using smakchet.application.DTOs.Product;
 using smakchet.application.DTOs.User;
+using smakchet.application.Helpers;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.ICategory;
 using smakchet.application.Interfaces.IOrder;
@@ -42,6 +43,11 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IMapper<Payment, PaymentReadDto, PaymentDto, PaymentUpdateDto>, PaymentMapper>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IPaymentService, PaymentService>();
+
+        services.AddSingleton<IBackgroundQueueService<PaymentStatusJob>,
+            BackgroundQueueService<PaymentStatusJob>>();
+
+        services.AddHostedService<PaymentStatusWorker>();
 
         services.AddScoped<ApiDeprecateActionFilter>();
         return services;
