@@ -14,6 +14,7 @@ namespace smakchet.application.Services
 {
     public class ProductService(
         IProductRepository repository,
+        IUnitOfWork unitOfWork,
         IMapper<Product, ProductReadDto, ProductDto, ProductUpdateDto> mapper,
         ILogger<ProductService> logger,
         IHttpContextAccessor contextAccessor) : IProductService
@@ -32,7 +33,7 @@ namespace smakchet.application.Services
             {
                 var mapped = mapper.ToEntity(productDto);
                 await repository.AddAsync(mapped, cancellationToken);
-                await repository.SaveChangesAsync(cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "Product");
 
                 return mapper.ToReadDto(mapped);
@@ -58,8 +59,8 @@ namespace smakchet.application.Services
 
             try
             {
-                await repository.DeleteAsync(existing, cancellationToken);
-                await repository.SaveChangesAsync(cancellationToken);
+                repository.Delete(existing);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Deleted, "Product");
             }
             catch (Exception ex)
@@ -126,8 +127,8 @@ namespace smakchet.application.Services
             try
             {
                 mapper.UpdateEntity(existing, productDto);
-                await repository.UpdateAsync(existing, cancellationToken);
-                await repository.SaveChangesAsync(cancellationToken);
+                repository.Update(existing);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Updated, "Product");
                 return mapper.ToReadDto(existing);
             }

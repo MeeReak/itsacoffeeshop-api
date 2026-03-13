@@ -14,6 +14,7 @@ namespace smakchet.application.Services
 {
     public class UserService(
         IUserRepository repository,
+        IUnitOfWork unitOfWork,
         IMapper<User, UserReadDto, UserDto, UserUpdateDto> mapper,
         IHttpContextAccessor contextAccessor) : IUserService
     {
@@ -21,7 +22,7 @@ namespace smakchet.application.Services
         {
             var mapped = mapper.ToEntity(userDto);
             await repository.AddAsync(mapped, cancellationToken);
-            await repository.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return mapper.ToReadDto(mapped);
         }
 
@@ -33,8 +34,8 @@ namespace smakchet.application.Services
             if (user == null)
                 throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "User", userId),
                     ErrorCodeConstants.NotFound);
-            await repository.DeleteAsync(user, cancellationToken);
-            await repository.SaveChangesAsync(cancellationToken);
+            repository.Delete(user);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
 
@@ -76,8 +77,8 @@ namespace smakchet.application.Services
                     ErrorCodeConstants.NotFound);
 
             mapper.UpdateEntity(user, userDto);
-            await repository.UpdateAsync(user, cancellationToken);
-            await repository.SaveChangesAsync(cancellationToken);
+            repository.Update(user);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return mapper.ToReadDto(user);
         }
     }

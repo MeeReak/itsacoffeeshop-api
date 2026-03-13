@@ -14,6 +14,7 @@ using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.IOrder;
 using smakchet.application.Interfaces.IPayment;
 using smakchet.application.Interfaces.IProduct;
+using smakchet.application.Repositories;
 using smakchet.dal.Models;
 
 namespace smakchet.application.Services;
@@ -22,6 +23,7 @@ public class OrderService(
     IOrderRepository orderRepository,
     IProductRepository productRepository,
     IPaymentRepository paymentRepository,
+    IUnitOfWork unitOfWork,
     IMapper<Order, OrderReadDto, OrderDto, OrderUpdateDto> orderMapper,
     ILogger<OrderService> logger,
     IHttpContextAccessor contextAccessor) : IOrderService
@@ -40,7 +42,7 @@ public class OrderService(
                 CashierId = orderDto.CashierId
             };
             await orderRepository.AddAsync(order, cancellationToken);
-            await orderRepository.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             order.Number = $"ORD-{order.Id:D6}";
             var orderStatusLog = new OrderStatusLog
@@ -51,7 +53,7 @@ public class OrderService(
             };
 
             order.OrderStatusLogs.Add(orderStatusLog);
-            await orderRepository.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return orderMapper.ToReadDto(order);
         }
@@ -75,7 +77,7 @@ public class OrderService(
 
         try
         {
-            await orderRepository.DeleteAsync(existing, cancellationToken);
+            orderRepository.Update(existing);
             logger.LogInformation(SuccessMessageConstants.Deleted, "Order");
         }
         catch (Exception ex)
@@ -136,8 +138,8 @@ public class OrderService(
         try
         {
             orderMapper.UpdateEntity(existing, orderDto);
-            await orderRepository.UpdateAsync(existing, cancellationToken);
-            await orderRepository.SaveChangesAsync(cancellationToken);
+            orderRepository.Update(existing);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             logger.LogInformation(SuccessMessageConstants.Updated, "Order");
             return orderMapper.ToReadDto(existing);
         }
@@ -230,7 +232,7 @@ public class OrderService(
 
         Recalculate(order);
 
-        await orderRepository.SaveChangesAsync(ct);
+        await unitOfWork.SaveChangesAsync(ct);
     }
 
 
@@ -255,7 +257,7 @@ public class OrderService(
 
         Recalculate(order);
 
-        await orderRepository.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Item removed from order {OrderId}", orderId);
     }
@@ -294,7 +296,7 @@ public class OrderService(
 
         Recalculate(order);
 
-        await orderRepository.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Item {ItemId} updated in order {OrderId}", itemId, orderId);
     }
 
@@ -336,7 +338,7 @@ public class OrderService(
                 UpdatedAt = DateTime.Now
             });
 
-            await orderRepository.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation(
                 "Order {OrderId} status updated from {Old} to {New}",

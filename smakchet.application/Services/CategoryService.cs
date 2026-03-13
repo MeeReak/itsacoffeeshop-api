@@ -14,6 +14,7 @@ namespace smakchet.application.Services
 {
     public class CategoryService(
         ICategoryRepository repository,
+        IUnitOfWork unitOfWork,
         IMapper<Category, CategoryReadDto, CategoryDto, CategoryUpdateDto> mapper,
         ILogger<CategoryService> logger,
         IHttpContextAccessor contextAccessor) : ICategoryService
@@ -32,7 +33,7 @@ namespace smakchet.application.Services
             {
                 var mapped = mapper.ToEntity(categoryDto);
                 await repository.AddAsync(mapped, cancellationToken);
-                await repository.SaveChangesAsync(cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "Category");
                 return mapper.ToReadDto(mapped);
             }
@@ -63,8 +64,8 @@ namespace smakchet.application.Services
 
             try
             {
-                await repository.DeleteAsync(existing, cancellationToken);
-                await repository.SaveChangesAsync(cancellationToken);
+                repository.Update(existing);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Deleted, "Category");
             }
             catch (Exception ex)
@@ -129,8 +130,8 @@ namespace smakchet.application.Services
             try
             {
                 mapper.UpdateEntity(existing, categoryDto);
-                await repository.UpdateAsync(existing, cancellationToken);
-                await repository.SaveChangesAsync(cancellationToken);
+                repository.Update(existing);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Updated, "Category");
                 return mapper.ToReadDto(existing);
             }

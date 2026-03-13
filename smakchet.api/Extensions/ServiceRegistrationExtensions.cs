@@ -44,6 +44,8 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IPaymentService, PaymentService>();
 
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         services.AddSingleton<IBackgroundQueueService<PaymentStatusJob>,
             BackgroundQueueService<PaymentStatusJob>>();
 

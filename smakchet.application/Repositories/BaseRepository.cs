@@ -1,28 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using smakchet.application.Interfaces;
 using smakchet.dal.Models;
+using System.Linq.Expressions;
 
 namespace smakchet.application.Repositories;
 
 public class BaseRepository<T>(SmakchetContext context) : IBaseRepository<T>
     where T : class
 {
-    public Task AddAsync(T entity, CancellationToken cancellationToken)
+    public async Task AddAsync(T entity, CancellationToken cancellationToken)
     {
-        context.Set<T>().Add(entity);
-        return Task.CompletedTask;
+        await context.Set<T>().AddAsync(entity, cancellationToken);
     }
 
-    public Task DeleteAsync(T entity, CancellationToken cancellationToken)
-    {
-        context.Set<T>().Remove(entity);
-        return Task.CompletedTask;
-    }
-
-    public Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    public void Update(T entity)
     {
         context.Set<T>().Update(entity);
-        return Task.CompletedTask;
+    }
+
+    public void Delete(T entity)
+    {
+        context.Set<T>().Remove(entity);
     }
 
     public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -33,20 +31,40 @@ public class BaseRepository<T>(SmakchetContext context) : IBaseRepository<T>
         );
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<List<T>> GetAllAsync(CancellationToken cancellationToken)
     {
         return await context.Set<T>()
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<T>> FindAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken)
+    {
+        return await context.Set<T>()
+            .Where(predicate)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<T?> FirstOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken)
+    {
+        return await context.Set<T>()
+            .FirstOrDefaultAsync(predicate, cancellationToken);
+    }
+
+    public async Task<bool> ExistsAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken)
+    {
+        return await context.Set<T>()
+            .AnyAsync(predicate, cancellationToken);
+    }
+
     public IQueryable<T> Query()
     {
         return context.Set<T>();
-    }
-
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        return context.SaveChangesAsync(cancellationToken);
     }
 }

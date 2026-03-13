@@ -20,6 +20,7 @@ namespace smakchet.application.Services
     public class PaymentService(
         IOrderRepository orderRepository,
         IPaymentRepository paymentRepository,
+        IUnitOfWork unitOfWork,
         IMapper<Payment, PaymentReadDto, PaymentDto, PaymentUpdateDto> mapper,
         ILogger<PaymentService> logger,
         IConfiguration configuration,
@@ -45,7 +46,7 @@ namespace smakchet.application.Services
                 payment.Status = (int)PaymemtStatusEnum.Success;
                 payment.PaidAt = DateTime.UtcNow;
 
-                await paymentRepository.SaveChangesAsync(cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "CheckTransaction");
                 return true;
             }
@@ -53,7 +54,7 @@ namespace smakchet.application.Services
             if (payment.ExpiredAt < DateTime.UtcNow)
             {
                 payment.Status = (int)PaymemtStatusEnum.Failed;
-                await paymentRepository.SaveChangesAsync(cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 logger.LogInformation(SuccessMessageConstants.Created, "CheckTransaction");
                 return true;
             }
@@ -98,7 +99,7 @@ namespace smakchet.application.Services
             };
 
             await paymentRepository.AddAsync(payment, cancellationToken);
-            await paymentRepository.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             await backgroundQueue.Enqueue(new PaymentStatusJob(payment.Id));
 
             return new PaymentCheckOutDto
