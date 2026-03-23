@@ -38,7 +38,7 @@ namespace smakchet.api.Controllers.V2026_01_01
         [HttpPost]
         [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> SaveProduct([FromBody] ProductDto productDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveProduct([FromForm] ProductDto productDto, CancellationToken cancellationToken)
         {
             var product = await service.CreateProductAsync(productDto, cancellationToken);
             return StatusCode(StatusCodes.Status201Created, product);
@@ -50,8 +50,8 @@ namespace smakchet.api.Controllers.V2026_01_01
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProduct(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken)
         {
-            await service.UpdateProductAsync(productId, productDto, cancellationToken);
-            return StatusCode(StatusCodes.Status204NoContent);
+            var product = await service.UpdateProductAsync(productId, productDto, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, product);
         }
 
 

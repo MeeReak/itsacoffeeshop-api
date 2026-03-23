@@ -260,6 +260,9 @@ public partial class SmakchetContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.Description)
+                .IsUnicode(false)
+                .HasColumnName("description");
             entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
             entity.Property(e => e.ImageUrl)
                 .IsUnicode(false)

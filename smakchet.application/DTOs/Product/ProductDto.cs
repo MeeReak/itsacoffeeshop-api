@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using smakchet.application.Constants.Category;
+﻿using Microsoft.AspNetCore.Http;
 using smakchet.application.Constants.Product;
+using smakchet.application.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace smakchet.application.DTOs.Product
 {
@@ -24,5 +25,11 @@ namespace smakchet.application.DTOs.Product
         [Required(ErrorMessage = ProductMessageConstant.RequiredCategoryId)]
         [RegularExpression(@"^\d+$", ErrorMessage = ProductMessageConstant.InvalidCategoryId)]
         public int CategoryId { get; set; }
+        public string? Description { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "File is required")]
+        [AllowedFileTypes(new[] { ".jpg", ".jpeg", ".png", ".webp" })]
+        [MaxFileSize(5 * 1024 * 1024)]
+        public required IFormFile File { get; set; }
     }
 }

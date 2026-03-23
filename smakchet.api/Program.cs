@@ -14,7 +14,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
     options.InvalidModelStateResponseFactory = InvalidModelStateResponse.ProduceErrorResponse;
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(); 
 builder.Services.AddSwaggerConfiguration();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAppDbContext(builder.Configuration);

@@ -1,5 +1,6 @@
 ﻿using smakchet.api.Filter;
 using smakchet.application.DTOs.Category;
+using smakchet.application.DTOs.IFileStorageService;
 using smakchet.application.DTOs.Order;
 using smakchet.application.DTOs.Payment;
 using smakchet.application.DTOs.Product;
@@ -50,6 +51,8 @@ public static class ServiceRegistrationExtensions
             BackgroundQueueService<PaymentStatusJob>>();
 
         services.AddHostedService<PaymentStatusWorker>();
+
+        services.AddScoped<IFileStorageService, FileStorageService>();
 
         services.AddScoped<ApiDeprecateActionFilter>();
         return services;
