@@ -14,6 +14,6 @@ namespace smakchet.application.DTOs.Category
         [RegularExpression(@"^\d+$", ErrorMessage = CategoryMessageConstant.InvalidDisplayNumber)]
         public int DisplayOrder { get; set; }
 
-        public bool? IsActive { get; set; } = true;
+        public bool IsActive { get; set; } = true;
     }
 }

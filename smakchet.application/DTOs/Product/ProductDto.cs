@@ -20,7 +20,7 @@ namespace smakchet.application.DTOs.Product
         [RegularExpression(@"^\d{1,5}$|(?=^.{1,5}$)^\d+\.\d{0,2}$", ErrorMessage = ProductMessageConstant.InvalidPrice)]
         public decimal Price { get; set; }
 
-        public bool? IsFeatured { get; set; } = false;
+        public bool IsFeatured { get; set; } = false;
 
         [Required(ErrorMessage = ProductMessageConstant.RequiredCategoryId)]
         [RegularExpression(@"^\d+$", ErrorMessage = ProductMessageConstant.InvalidCategoryId)]

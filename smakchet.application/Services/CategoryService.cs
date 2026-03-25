@@ -95,13 +95,14 @@ namespace smakchet.application.Services
 
         public async Task<ResponsePagingDto<CategoryReadDto>> GetCategoryPagedAsync(PaginationQueryParams param)
         {
-            var query = repository.Query()
-                .OrderBy(c => c.DisplayOrder)
-                .Where(c => c.IsActive == true);
+            IQueryable<Category> query = repository.Query()
+                .Where(c => c.IsActive);
+
+            query = query.OrderBy(c => c.DisplayOrder);
 
             if (!string.IsNullOrWhiteSpace(param.Search))
             {
-                query = (IOrderedQueryable<Category>)query.Where(c => c.Name.Contains(param.Search));
+                query = query.Where(c => c.Name.Contains(param.Search));
             }
 
             var categories = await query

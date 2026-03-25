@@ -15,7 +15,7 @@ public partial class Product
 
     public string ImageUrl { get; set; }
 
-    public bool? IsFeatured { get; set; }
+    public bool IsFeatured { get; set; }
 
     public int DisplayOrder { get; set; }
 

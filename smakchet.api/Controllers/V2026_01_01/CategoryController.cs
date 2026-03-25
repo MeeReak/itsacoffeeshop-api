@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using smakchet.application.DTOs;
 using smakchet.application.DTOs.Category;
 using smakchet.application.DTOs.Error;
-using smakchet.application.DTOs.Product;
 using smakchet.application.DTOs.Success;
 using smakchet.application.Interfaces.ICategory;
 
