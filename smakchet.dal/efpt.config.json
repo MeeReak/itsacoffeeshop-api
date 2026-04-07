@@ -19,7 +19,15 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[CoffeeLevels]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[ErrorLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Ices]",
          "ObjectType": 0
       },
       {
@@ -51,11 +59,23 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[Sizes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Sugars]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[UserRoles]",
          "ObjectType": 0
       },
       {
          "Name": "[dbo].[Users]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Variations]",
          "ObjectType": 0
       }
    ],

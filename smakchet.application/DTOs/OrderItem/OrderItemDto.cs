@@ -22,5 +22,8 @@ namespace smakchet.application.DTOs.OrderItem
 
 
         public string? Note { get; set; }
+
+        [Required(ErrorMessage = OrderMessageConstant.RequiredNumber)]
+        public string Number { get; set; } = string.Empty;
     }
 }

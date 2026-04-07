@@ -15,7 +15,11 @@ public partial class SmakchetContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<CoffeeLevel> CoffeeLevels { get; set; }
+
     public virtual DbSet<ErrorLog> ErrorLogs { get; set; }
+
+    public virtual DbSet<Ice> Ices { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
 
@@ -31,9 +35,15 @@ public partial class SmakchetContext : DbContext
 
     public virtual DbSet<Role> Roles { get; set; }
 
+    public virtual DbSet<Size> Sizes { get; set; }
+
+    public virtual DbSet<Sugar> Sugars { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
+
+    public virtual DbSet<Variation> Variations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -62,6 +72,26 @@ public partial class SmakchetContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+        });
+
+        modelBuilder.Entity<CoffeeLevel>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CoffeeLe__3213E83F8869E27F");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(NULL)")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
         });
@@ -98,6 +128,26 @@ public partial class SmakchetContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("source");
+        });
+
+        modelBuilder.Entity<Ice>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Size__3213E83F4B4180AA");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(NULL)")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -145,14 +195,21 @@ public partial class SmakchetContext : DbContext
             entity.HasIndex(e => e.ProductId, "IX_OrderItems_ProductId");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CoffeeLevelId).HasColumnName("coffee_level_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.IceLevelId).HasColumnName("ice_level_id");
             entity.Property(e => e.Note)
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("note");
+            entity.Property(e => e.Number)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("number");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
@@ -164,7 +221,17 @@ public partial class SmakchetContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("product_name");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
-            entity.Property(e => e.Size).HasColumnName("size");
+            entity.Property(e => e.SizeId).HasColumnName("size_id");
+            entity.Property(e => e.SugarLevelId).HasColumnName("sugar_level_id");
+            entity.Property(e => e.VariationId).HasColumnName("variation_id");
+
+            entity.HasOne(d => d.CoffeeLevel).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.CoffeeLevelId)
+                .HasConstraintName("FK_OrderItems_CoffeeLevel");
+
+            entity.HasOne(d => d.IceLevel).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.IceLevelId)
+                .HasConstraintName("FK_OrderItems_IceLevel");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.OrderId)
@@ -174,6 +241,18 @@ public partial class SmakchetContext : DbContext
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_orderitems_products");
+
+            entity.HasOne(d => d.Size).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.SizeId)
+                .HasConstraintName("FK_OrderItems_Size");
+
+            entity.HasOne(d => d.SugarLevel).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.SugarLevelId)
+                .HasConstraintName("FK_OrderItems_SugarLevel");
+
+            entity.HasOne(d => d.Variation).WithMany(p => p.OrderItems)
+                .HasForeignKey(d => d.VariationId)
+                .HasConstraintName("FK_OrderItems_Variation");
         });
 
         modelBuilder.Entity<OrderStatusLog>(entity =>
@@ -328,6 +407,46 @@ public partial class SmakchetContext : DbContext
                 .HasColumnName("updated_at");
         });
 
+        modelBuilder.Entity<Size>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Ices__3213E83F138317C0");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(NULL)")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+        });
+
+        modelBuilder.Entity<Sugar>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Sugars__3213E83F45874842");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(NULL)")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Users__3214EC0740C7F2BB");
@@ -390,6 +509,26 @@ public partial class SmakchetContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_UserRoles_Users");
+        });
+
+        modelBuilder.Entity<Variation>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Variatio__3213E83F2ABDFB06");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(NULL)")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
         });
 
         OnModelCreatingPartial(modelBuilder);

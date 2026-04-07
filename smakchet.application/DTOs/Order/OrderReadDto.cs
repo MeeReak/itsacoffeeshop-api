@@ -13,6 +13,6 @@ namespace smakchet.application.DTOs.Order
         public decimal Total { get; set; }
         public int CashierId { get; set; }
         public DateTime? CreatedAt { get; set; }
-        public List<OrderItemReadDto>? Items { get; set; }
+        public List<OrderItemReadDto>? OrderItems { get; set; }
     }
 }

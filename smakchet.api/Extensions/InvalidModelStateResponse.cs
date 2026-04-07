@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using smakchet.application.DTOs.Error;
+using System.Text.RegularExpressions;
 
 namespace smakchet.api.Extensions;
 
@@ -10,10 +11,17 @@ public static class InvalidModelStateResponse
     {
         var errors = context.ModelState
             .Where(ms => ms.Value?.ValidationState == ModelValidationState.Invalid)
-            .SelectMany(kvp => kvp.Value!.Errors.Select(e => new ValidationError
+            .SelectMany(kvp => kvp.Value!.Errors.Select(e =>
             {
-                Field = kvp.Key,
-                Message = e.ErrorMessage
+                var field = NormalizeField(kvp.Key);
+                var message = NormalizeMessage(e.ErrorMessage, field);
+
+                return new ErrorDetailDto
+                {
+                    Code = "ValidationError",
+                    Target = field,
+                    Message = message
+                };
             }))
             .ToList();
 
@@ -24,20 +32,34 @@ public static class InvalidModelStateResponse
                 Code = "InvalidModelState",
                 Message = "Validation failed for one or more fields.",
                 Target = "ModelValidation",
-                Details = errors.Select(e => new ErrorDetailDto
-                {
-                    Code = "ValidationError",
-                    Message = e.Message,
-                    Target = e.Field
-                }).ToList()
+                Details = errors
             }
         };
 
         return new BadRequestObjectResult(response);
     }
-}
-public class ValidationError
-{
-    public string Field { get; set; } = string.Empty;
-    public string Message { get; set; } = string.Empty;
+
+    private static string NormalizeField(string field)
+    {
+        field = field.Replace("$.", "");
+
+        field = Regex.Replace(field, @"\[\d+\]", "");
+
+        var parts = field.Split('.');
+        field = string.Join(".", parts.Select(p =>
+            char.ToLowerInvariant(p[0]) + p.Substring(1)));
+
+        return field;
+    }
+
+    private static string NormalizeMessage(string message, string field)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return $"Invalid value for '{field}'.";
+
+        if (message.Contains("could not be converted"))
+            return $"Invalid value for '{field}'.";
+
+        return message;
+    }
 }

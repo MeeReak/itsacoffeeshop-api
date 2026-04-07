@@ -9,6 +9,8 @@ public partial class OrderItem
 {
     public int Id { get; set; }
 
+    public string Number { get; set; }
+
     public int OrderId { get; set; }
 
     public int ProductId { get; set; }
@@ -19,13 +21,31 @@ public partial class OrderItem
 
     public decimal Price { get; set; }
 
-    public int Size { get; set; }
-
     public string Note { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
+    public int? SizeId { get; set; }
+
+    public int? IceLevelId { get; set; }
+
+    public int? SugarLevelId { get; set; }
+
+    public int? CoffeeLevelId { get; set; }
+
+    public int? VariationId { get; set; }
+
+    public virtual CoffeeLevel CoffeeLevel { get; set; }
+
+    public virtual Ice IceLevel { get; set; }
+
     public virtual Order Order { get; set; }
 
     public virtual Product Product { get; set; }
+
+    public virtual Size Size { get; set; }
+
+    public virtual Sugar SugarLevel { get; set; }
+
+    public virtual Variation Variation { get; set; }
 }

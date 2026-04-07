@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using smakchet.application.DTOs;
 using smakchet.application.DTOs.Error;
 using smakchet.application.DTOs.Order;
-using smakchet.application.DTOs.OrderItem;
 using smakchet.application.DTOs.Success;
 using smakchet.application.Interfaces.IOrder;
 
@@ -18,31 +17,23 @@ namespace smakchet.api.Controllers.V2026_01_01
         [HttpGet("{orderId:int}/items")]
         [ProducesResponseType(typeof(ResponsePagingDto<OrderReadDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetAllOrderItem([FromRoute] int orderId, [FromRoute] int itemId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllOrderItem(
+            [FromRoute] int orderId,
+            CancellationToken cancellationToken)
         {
-            var order = await service.GetOrderItemByIdAsync(orderId, cancellationToken);
-            return StatusCode(StatusCodes.Status200OK, order);
+            var items = await service.GetOrderItemByIdAsync(orderId, cancellationToken);
+            return Ok(items);
         }
 
 
-        [HttpDelete("{orderId:int}/items/{itemId:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RemoveOrderItem([FromRoute] int orderId, [FromRoute] int itemId, CancellationToken cancellationToken)
-        {
-            await service.RemoveItemAsync(orderId, itemId, cancellationToken);
-            return StatusCode(StatusCodes.Status204NoContent);
-        }
-
-
-        [HttpPatch("{orderId:int}/items/{itemId:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateOrderItem([FromRoute] int orderId, [FromRoute] int itemId, [FromBody] OrderItemUpdateDto itemDto, CancellationToken cancellationToken)
-        {
-            await service.UpdateItemAsync(orderId, itemId, itemDto, cancellationToken);
-            return StatusCode(StatusCodes.Status204NoContent);
-        }
+        //[HttpDelete("{orderId:int}/items/{itemId:int}")]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        //public async Task<IActionResult> RemoveOrderItem([FromRoute] int orderId, [FromRoute] int itemId, CancellationToken cancellationToken)
+        //{
+        //    await service.RemoveItemAsync(orderId, itemId, cancellationToken);
+        //    return StatusCode(StatusCodes.Status204NoContent);
+        //}
 
 
         [HttpGet("{orderId:int}/status")]
@@ -55,13 +46,14 @@ namespace smakchet.api.Controllers.V2026_01_01
         }
 
 
-        [HttpPost("{orderId:int}")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddOrderItem([FromRoute] int orderId, [FromBody] OrderItemDto orderDto, CancellationToken cancellationToken)
+        [HttpGet("{orderId:int}/item")]
+        [ProducesResponseType(typeof(OrderReadDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetOrderItem(int orderId, CancellationToken cancellationToken)
         {
-            await service.AddItemAsync(orderId, orderDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created);
+
+            var order = await service.GetOrderByIdAsync(orderId, cancellationToken);
+            return StatusCode(StatusCodes.Status200OK, order);
         }
 
 
@@ -99,9 +91,9 @@ namespace smakchet.api.Controllers.V2026_01_01
         [HttpPut("{orderId:int}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateOrder(int orderId, OrderUpdateDto orderDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateOrder([FromRoute] int orderId, [FromBody] OrderUpdateDto payload, CancellationToken cancellationToken)
         {
-            var order = await service.UpdateOrderAsync(orderId, orderDto, cancellationToken);
+            var order = await service.UpdateOrderAsync(orderId, payload, cancellationToken);
             return StatusCode(StatusCodes.Status201Created, order);
         }
 

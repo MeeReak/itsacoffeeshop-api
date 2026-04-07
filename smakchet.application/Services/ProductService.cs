@@ -99,7 +99,7 @@ public class ProductService(
         IQueryable<Product> query = repository.Query();
 
         if (param.IsFeature == true)
-            query = query.Where(c => c.IsFeatured);
+            query = query.Where(c => (bool)c.IsFeatured!);
 
         if (!string.IsNullOrWhiteSpace(param.Search))
             query = query.Where(c => c.Name.Contains(param.Search));

@@ -2,6 +2,7 @@
 using smakchet.application.Constants.Order;
 using smakchet.application.Validation;
 using System.ComponentModel.DataAnnotations;
+using smakchet.application.DTOs.OrderItem;
 
 namespace smakchet.application.DTOs.Order
 {
@@ -13,5 +14,8 @@ namespace smakchet.application.DTOs.Order
 
 
         public int CashierId { get; set; }
+
+
+        public List<OrderItemDto> OrderItems { get; set; } = new List<OrderItemDto>();
     }
 }

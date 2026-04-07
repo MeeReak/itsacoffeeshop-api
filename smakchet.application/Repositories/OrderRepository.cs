@@ -11,7 +11,8 @@ public class OrderRepository(SmakchetContext context) : BaseRepository<Order>(co
         CancellationToken ct)
     {
         return await context.Orders
-            .Include(o => o.OrderItems)
+            .Include(o => o.OrderItems)     
+            .ThenInclude(oi => oi.Product) 
             .FirstOrDefaultAsync(o => o.Id == orderId, ct);
     }
 }

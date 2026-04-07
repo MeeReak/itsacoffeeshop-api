@@ -9,6 +9,7 @@ using smakchet.application.Helpers;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.ICategory;
 using smakchet.application.Interfaces.IOrder;
+using smakchet.application.Interfaces.IOrderItem;
 using smakchet.application.Interfaces.IPayment;
 using smakchet.application.Interfaces.IProduct;
 using smakchet.application.Interfaces.IUser;
@@ -45,6 +46,9 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IPaymentService, PaymentService>();
 
+        services.AddScoped<IFileStorageService, FileStorageService>();
+        services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddSingleton<IBackgroundQueueService<PaymentStatusJob>,
@@ -52,7 +56,6 @@ public static class ServiceRegistrationExtensions
 
         services.AddHostedService<PaymentStatusWorker>();
 
-        services.AddScoped<IFileStorageService, FileStorageService>();
 
         services.AddScoped<ApiDeprecateActionFilter>();
         return services;

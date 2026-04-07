@@ -12,15 +12,16 @@ using smakchet.application.Exceptions;
 using smakchet.application.Helpers;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.IOrder;
+using smakchet.application.Interfaces.IOrderItem;
 using smakchet.application.Interfaces.IPayment;
 using smakchet.application.Interfaces.IProduct;
-using smakchet.application.Repositories;
 using smakchet.dal.Models;
 
 namespace smakchet.application.Services;
 
 public class OrderService(
     IOrderRepository orderRepository,
+    IOrderItemRepository orderItemRepository,
     IProductRepository productRepository,
     IPaymentRepository paymentRepository,
     IUnitOfWork unitOfWork,
@@ -44,6 +45,26 @@ public class OrderService(
             await orderRepository.AddAsync(order, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
+            foreach (var item in orderDto.OrderItems)
+            {
+                var product = await productRepository.GetByIdAsync(item.ProductId, cancellationToken);
+                if (product == null) throw new NotFoundException("Product not found");
+
+                var orderItem = new OrderItem
+                {
+                    Number = item.Number,
+                    OrderId = order.Id,      
+                    ProductId = product.Id,
+                    ProductName = product.Name,
+                    Note = item.Note,
+                    Price = product.Price,
+                    Quantity = item.Quantity,
+                    Size = (int)item.Size!
+                };
+
+                await orderItemRepository.AddAsync(orderItem, cancellationToken);
+            }
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             order.Number = $"ORD-{order.Id:D6}";
             var orderStatusLog = new OrderStatusLog
             {
@@ -53,6 +74,7 @@ public class OrderService(
             };
 
             order.OrderStatusLogs.Add(orderStatusLog);
+            Recalculate(order);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return orderMapper.ToReadDto(order);
@@ -90,7 +112,7 @@ public class OrderService(
 
     public async Task<OrderReadDto?> GetOrderByIdAsync(int orderId, CancellationToken cancellationToken)
     {
-        var existing = await orderRepository.GetByIdAsync(orderId, cancellationToken);
+        var existing = await orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
         if (existing == null)
         {
             logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
@@ -124,22 +146,92 @@ public class OrderService(
     }
 
 
-    public async Task<OrderReadDto?> UpdateOrderAsync(int orderId, OrderUpdateDto orderDto,
-        CancellationToken cancellationToken)
+    public async Task<OrderReadDto?> UpdateOrderAsync(int orderId, OrderUpdateDto payload,
+    CancellationToken cancellationToken)
     {
-        var existing = await orderRepository.GetByIdAsync(orderId, cancellationToken);
+        var existing = await orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
         if (existing == null)
-        {
-            logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
-            throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
+            throw new NotFoundException(
+                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
                 ErrorCodeConstants.NotFound);
-        }
+
+        if (existing.Status != (int)OrderStatusEnum.Pending)
+            throw new BadRequestException(OrderMessageConstant.NotOpen);
 
         try
         {
-            orderMapper.UpdateEntity(existing, orderDto);
+            // Update order header
+            existing.Type = (int)payload.Type!;
+            existing.CashierId = payload.CashierId;
+
+            // --- Update or Add Order Items ---
+            foreach (var dtoItem in payload.OrderItems)
+            {
+
+                var exitedProduct = await productRepository.GetByIdAsync(dtoItem.ProductId, cancellationToken);
+                if (exitedProduct == null)
+                    throw new NotFoundException(
+                        string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", dtoItem.ProductId),
+                        ErrorCodeConstants.NotFound);
+
+                // Match by ProductId + Number
+                var item = existing.OrderItems
+                    .FirstOrDefault(i => i.ProductId == dtoItem.ProductId && i.Number == dtoItem.Number);
+
+                if (item == null)
+                {
+                    // Add new item if quantity > 0
+                    if (dtoItem.Quantity <= 0) continue;
+
+                    item = new OrderItem
+                    {
+                        ProductId = exitedProduct.Id,
+                        ProductName = exitedProduct.Name,
+                        Quantity = dtoItem.Quantity,
+                        Note = dtoItem.Note,
+                        Size = (int)dtoItem.Size!,
+                        Number = dtoItem.Number,
+                        Price = exitedProduct.Price
+                    };
+                    existing.OrderItems.Add(item);
+
+                    logger.LogInformation("Item {ProductId}-{Number} added to order {OrderId}", dtoItem.ProductId, dtoItem.Number, orderId);
+                }
+                else
+                {
+                    // Update existing item
+                    if (dtoItem.Quantity <= 0)
+                    {
+                        existing.OrderItems.Remove(item);
+                        logger.LogInformation("Item {ProductId}-{Number} removed from order {OrderId}", dtoItem.ProductId, dtoItem.Number, orderId);
+                        continue;
+                    }
+
+                    item.Quantity = dtoItem.Quantity;
+                    item.Note = dtoItem.Note;
+                    item.Size = (int)dtoItem.Size!;
+                    item.Number = dtoItem.Number;
+
+                    logger.LogInformation("Item {ProductId}-{Number} updated in order {OrderId}", dtoItem.ProductId, dtoItem.Number, orderId);
+                }
+            }
+
+            // --- Remove items not in the payload ---
+            foreach (var item in existing.OrderItems.ToList())
+            {
+                if (!payload.OrderItems.Any(d => d.ProductId == item.ProductId && d.Number == item.Number))
+                {
+                    existing.OrderItems.Remove(item);
+                    logger.LogInformation("Item {ProductId}-{Number} removed from order {OrderId}", item.ProductId, item.Number, orderId);
+                }
+            }
+
+            // Recalculate totals
+            Recalculate(existing);
+
             orderRepository.Update(existing);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
             logger.LogInformation(SuccessMessageConstants.Updated, "Order");
             return orderMapper.ToReadDto(existing);
         }
@@ -149,8 +241,6 @@ public class OrderService(
             throw;
         }
     }
-
-
     private void Recalculate(Order order)
     {
         decimal subtotal = 0;
@@ -190,114 +280,6 @@ public class OrderService(
         var result = orderMapper.ToReadDto(existing);
         logger.LogInformation(SuccessMessageConstants.Retrieved, "Order");
         return result;
-    }
-
-
-    public async Task AddItemAsync(int orderId, OrderItemDto itemDto, CancellationToken ct)
-    {
-        var product = await productRepository.GetByIdAsync(itemDto.ProductId, ct);
-        if (product == null)
-            throw new NotFoundException("Product not found");
-
-        var order = await orderRepository.GetOrderWithItemsAsync(orderId, ct);
-        if (order == null)
-            throw new NotFoundException("Order not found");
-
-        if (order.Status != (int)OrderStatusEnum.Pending)
-            throw new BadRequestException("Order is not open");
-
-        var existingItem = order.OrderItems
-            .FirstOrDefault(i => i.ProductId == itemDto.ProductId
-                                 && i.Size == (int)itemDto.Size!);
-
-        if (existingItem != null)
-        {
-            existingItem.Quantity += itemDto.Quantity;
-        }
-        else
-        {
-            var newItem = new OrderItem
-            {
-                ProductId = product.Id,
-                ProductName = product.Name,
-                Price = product.Price,
-                Quantity = itemDto.Quantity,
-                Size = (int)itemDto.Size!,
-                Note = itemDto.Note,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            order.OrderItems.Add(newItem);
-        }
-
-        Recalculate(order);
-
-        await unitOfWork.SaveChangesAsync(ct);
-    }
-
-
-    public async Task RemoveItemAsync(int orderId, int itemId, CancellationToken cancellationToken)
-    {
-        var order = await orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
-        if (order == null)
-            throw new NotFoundException(
-                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
-                ErrorCodeConstants.NotFound);
-
-        if (order.Status != (int)OrderStatusEnum.Pending)
-            throw new BadRequestException(OrderMessageConstant.NotOpen);
-
-        var item = order.OrderItems.FirstOrDefault(i => i.Id == itemId);
-        if (item == null)
-            throw new NotFoundException(
-                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Item", itemId),
-                ErrorCodeConstants.NotFound);
-
-        order.OrderItems.Remove(item);
-
-        Recalculate(order);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.LogInformation("Item removed from order {OrderId}", orderId);
-    }
-
-
-    public async Task UpdateItemAsync(int orderId, int itemId, OrderItemUpdateDto itemDto,
-        CancellationToken cancellationToken)
-    {
-        var order = await orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
-        if (order == null)
-        {
-            logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId);
-            throw new NotFoundException(
-                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Order", orderId),
-                ErrorCodeConstants.NotFound);
-        }
-
-        if (order.Status != (int)OrderStatusEnum.Pending)
-            throw new BadRequestException(OrderMessageConstant.NotOpen);
-
-        var item = order.OrderItems.FirstOrDefault(i => i.Id == itemId);
-        if (item == null)
-        {
-            logger.LogError(ErrorMessageConstants.ResourceNotFoundById, "Item", itemId);
-            throw new NotFoundException(
-                string.Format(ErrorMessageConstants.ResourceNotFoundById, "Item", itemId),
-                ErrorCodeConstants.NotFound);
-        }
-
-        if (itemDto.Quantity <= 0)
-            throw new BadRequestException("Quantity must be greater than 0");
-
-        item.Quantity = itemDto.Quantity;
-        item.Note = itemDto.Note;
-        item.Size = (int)itemDto.Size!;
-
-        Recalculate(order);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        logger.LogInformation("Item {ItemId} updated in order {OrderId}", itemId, orderId);
     }
 
 

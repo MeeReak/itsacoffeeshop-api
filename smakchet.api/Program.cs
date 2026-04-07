@@ -1,6 +1,7 @@
 using Asp.Versioning.ApiExplorer;
-using smakchet.application.Middleware;
+using Microsoft.AspNetCore.Mvc;
 using smakchet.api.Extensions;
+using smakchet.application.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,7 @@ builder.Services.AddCustomApiVersioning();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 
-builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = InvalidModelStateResponse.ProduceErrorResponse;
 });
@@ -45,7 +46,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors(MyAllowSpecificOrigins);
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
-app.UseAuthorization();
+//app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
