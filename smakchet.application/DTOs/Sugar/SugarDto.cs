@@ -1,9 +1,11 @@
 ﻿namespace smakchet.application.DTOs.Sugar
 {
-    public class SugarReadDto
+    public class SugarDto : SugarBaseDto
     {
-        public int Id { get; set; }
+    }
+
+    public class SugarBaseDto
+    {
         public string Name { get; set; } = string.Empty;
-        public DateTime? CreatedAt { get; set; }
     }
 }

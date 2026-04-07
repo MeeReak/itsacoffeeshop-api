@@ -1,5 +1,6 @@
 ﻿using smakchet.api.Filter;
 using smakchet.application.DTOs.Category;
+using smakchet.application.DTOs.Ice;
 using smakchet.application.DTOs.IFileStorageService;
 using smakchet.application.DTOs.Order;
 using smakchet.application.DTOs.Payment;
@@ -9,6 +10,7 @@ using smakchet.application.DTOs.User;
 using smakchet.application.Helpers;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.ICategory;
+using smakchet.application.Interfaces.IIce;
 using smakchet.application.Interfaces.IOrder;
 using smakchet.application.Interfaces.IOrderItem;
 using smakchet.application.Interfaces.IPayment;
@@ -51,6 +53,10 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IMapper<Sugar, SugarReadDto, SugarDto, SugarUpdateDto>, SugarMapper>();
         services.AddScoped<ISugarRepository, SugarRepository>();
         services.AddScoped<ISugarService, SugarService>();
+
+        services.AddScoped<IMapper<Ice, IceReadDto, IceDto, IceUpdateDto>, IceMapper>();
+        services.AddScoped<IIceRepository, IceRepository>();
+        services.AddScoped<IIceService, IceService>();
 
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IOrderItemRepository, OrderItemRepository>();

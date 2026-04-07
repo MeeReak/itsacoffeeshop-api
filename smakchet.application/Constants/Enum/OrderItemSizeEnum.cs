@@ -2,8 +2,7 @@
 {
     public enum OrderItemSizeEnum
     {
-        Small,
-        Medium,
-        Large
+        Small = 1,
+        Medium = 2,
     }
 }

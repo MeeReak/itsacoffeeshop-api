@@ -37,7 +37,7 @@ namespace smakchet.application.Mappings
                         ProductName = item.Product?.Name ?? item.ProductName,
                         Price = item.Price,
                         Quantity = item.Quantity,
-                        Size = item.Size,
+                        //Size = item.Size,
                         Note = item.Note,
                         Number = item.Number,
                         ProductDetails = item.Product != null

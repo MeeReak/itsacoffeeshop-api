@@ -11,7 +11,7 @@ namespace smakchet.application.DTOs.OrderItem
         public string Number { get; set; } = string.Empty;
 
         [EnumValidation(typeof(OrderItemSizeEnum))]
-        public OrderItemSizeEnum? Size { get; set; }
+        public int SizeId { get; set; }
 
         public string Note { get; set; } = string.Empty;
     }
