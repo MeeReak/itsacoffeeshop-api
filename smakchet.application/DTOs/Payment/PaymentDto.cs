@@ -9,12 +9,13 @@ namespace smakchet.application.DTOs.Payment
     public class PaymentDto
     {
         [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
-        [EnumValidation(typeof(PaymentMethodEnum))]
+        [JsonConverter(typeof(StrictEnumConverter<PaymentMethodEnum>))]
+
         public PaymentMethodEnum? Method { get; set; }
 
 
         [Required(ErrorMessage = OrderMessageConstant.RequiredType)]
-        [EnumValidation(typeof(KHQRCurrencyEnum))]
+        [JsonConverter(typeof(StrictEnumConverter<KHQRCurrencyEnum>))]
         public KHQRCurrencyEnum? Currency { get; set; }
     }
 
@@ -44,7 +45,7 @@ namespace smakchet.application.DTOs.Payment
         public int ResponseCode { get; set; }
 
 
-        [JsonProperty("errorCode")] 
+        [JsonProperty("errorCode")]
         public string? ErrorCode { get; set; } = string.Empty;
 
 

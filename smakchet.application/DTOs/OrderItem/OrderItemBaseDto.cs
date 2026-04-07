@@ -1,11 +1,9 @@
 ﻿using smakchet.application.Constants.Order;
-using smakchet.application.Validation;
 using System.ComponentModel.DataAnnotations;
-using smakchet.application.Constants.Enum;
 
 namespace smakchet.application.DTOs.OrderItem
 {
-    public class OrderItemDto
+    public class OrderItemBaseDto
     {
         [Required(ErrorMessage = OrderMessageConstant.RequiredProductId)]
         public int ProductId { get; set; }
@@ -15,15 +13,15 @@ namespace smakchet.application.DTOs.OrderItem
         [RegularExpression(@"^\d+$", ErrorMessage = OrderMessageConstant.InvalidQuantity)]
         public int Quantity { get; set; }
 
-
-        [Required(ErrorMessage = OrderMessageConstant.RequiredSize)]
-        [EnumValidation(typeof(OrderItemSizeEnum))]
-        public OrderItemSizeEnum? Size { get; set; }
-
-
+        public int? SizeId { get; set; }
+        public int? SugarLevelId { get; set; }
+        public int? IceLevelId { get; set; }
+        public int? CoffeeLevelId { get; set; }
+        public int? VariationId { get; set; }
         public string? Note { get; set; }
 
         [Required(ErrorMessage = OrderMessageConstant.RequiredNumber)]
         public string Number { get; set; } = string.Empty;
     }
+
 }

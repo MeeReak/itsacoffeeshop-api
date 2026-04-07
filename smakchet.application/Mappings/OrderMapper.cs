@@ -30,27 +30,30 @@ namespace smakchet.application.Mappings
                 Total = entity.Total,
                 CreatedAt = entity.CreatedAt,
                 OrderItems = entity.OrderItems != null && entity.OrderItems.Any()
-                    ? entity.OrderItems.Select(item => new OrderItemReadDto
-                    {
-                        Id = item.Id,
-                        ProductId = item.ProductId,
-                        ProductName = item.Product?.Name ?? item.ProductName,
-                        Price = item.Price,
-                        Quantity = item.Quantity,
-                        //Size = item.Size,
-                        Note = item.Note,
-                        Number = item.Number,
+                    ? [.. entity.OrderItems.Select(item => new OrderItemReadDto
+                {
+                    Id = item.Id,
+                    ProductId = item.ProductId,
+                    ProductName = item.Product?.Name ?? item.ProductName,
+                    Price = item.Price,
+                    Quantity = item.Quantity,
+                    Note = item.Note,
+                    Number = item.Number,
+                    SizeId = item.SizeId,
+                    SugarId = item.SugarLevelId,
+                    CoffeeLevelId = item.CoffeeLevelId,
+                    VariationId = item.VariationId,
                         ProductDetails = item.Product != null
-                            ? new ProductDetailReadDto
-                            {
-                                Id = item.Product.Id,
-                                Name = item.Product.Name,
-                                Price = item.Product.Price,
-                                ImageUrl = $"http://localhost:9000{item.Product.ImageUrl}"
-                            }
-                            : null
-                    }).ToList()
-                    : new List<OrderItemReadDto>()
+                        ? new ProductDetailReadDto
+                        {
+                            Id = item.Product.Id,
+                            Name = item.Product.Name,
+                            Price = item.Product.Price,
+                            ImageUrl = $"http://localhost:9000{item.Product.ImageUrl}"
+                        }
+                        : null
+                })]
+                        : []
             };
         }
 

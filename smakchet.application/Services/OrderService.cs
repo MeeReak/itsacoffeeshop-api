@@ -6,7 +6,6 @@ using smakchet.application.Constants.Enum;
 using smakchet.application.Constants.Order;
 using smakchet.application.DTOs;
 using smakchet.application.DTOs.Order;
-using smakchet.application.DTOs.OrderItem;
 using smakchet.application.DTOs.Success;
 using smakchet.application.Exceptions;
 using smakchet.application.Helpers;
@@ -42,30 +41,44 @@ public class OrderService(
                 Total = 0,
                 CashierId = orderDto.CashierId
             };
+
             await orderRepository.AddAsync(order, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
+            var productIds = orderDto.OrderItems.Select(x => x.ProductId).Distinct().ToList();
+
+            var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
+            var productDict = products.ToDictionary(p => p.Id);
+
             foreach (var item in orderDto.OrderItems)
             {
-                var product = await productRepository.GetByIdAsync(item.ProductId, cancellationToken);
-                if (product == null) throw new NotFoundException("Product not found");
+                if (!productDict.TryGetValue(item.ProductId, out var product))
+                    throw new NotFoundException($"Product {item.ProductId} not found");
 
                 var orderItem = new OrderItem
                 {
                     Number = item.Number,
-                    OrderId = order.Id,      
+                    OrderId = order.Id,
                     ProductId = product.Id,
                     ProductName = product.Name,
                     Note = item.Note,
                     Price = product.Price,
                     Quantity = item.Quantity,
-                    //Size = (int)item.Size!
+
+                    SizeId = item.SizeId,
+                    IceLevelId = item.IceLevelId,
+                    SugarLevelId = item.SugarLevelId,
+                    CoffeeLevelId = item.CoffeeLevelId,
+                    VariationId = item.VariationId
                 };
 
                 await orderItemRepository.AddAsync(orderItem, cancellationToken);
             }
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
             order.Number = $"ORD-{order.Id:D6}";
+
             var orderStatusLog = new OrderStatusLog
             {
                 Order = order,
@@ -74,7 +87,9 @@ public class OrderService(
             };
 
             order.OrderStatusLogs.Add(orderStatusLog);
+
             Recalculate(order);
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return orderMapper.ToReadDto(order);
@@ -149,6 +164,7 @@ public class OrderService(
     public async Task<OrderReadDto?> UpdateOrderAsync(int orderId, OrderUpdateDto payload,
     CancellationToken cancellationToken)
     {
+        // Fetch the order with items
         var existing = await orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
         if (existing == null)
             throw new NotFoundException(
@@ -164,77 +180,90 @@ public class OrderService(
             existing.Type = (int)payload.Type!;
             existing.CashierId = payload.CashierId;
 
-            // --- Update or Add Order Items ---
+            // Fetch all products involved in this update to avoid multiple DB calls
+            var productIds = payload.OrderItems.Select(x => x.ProductId).Distinct().ToList();
+            var products = await productRepository.GetByIdsAsync(productIds, cancellationToken);
+            var productDict = products.ToDictionary(p => p.Id);
+
             foreach (var dtoItem in payload.OrderItems)
             {
-
-                var exitedProduct = await productRepository.GetByIdAsync(dtoItem.ProductId, cancellationToken);
-                if (exitedProduct == null)
+                if (!productDict.TryGetValue(dtoItem.ProductId, out var product))
                     throw new NotFoundException(
-                        string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", dtoItem.ProductId),
-                        ErrorCodeConstants.NotFound);
-
-                var exitedSize = await productRepository.GetByIdAsync(dtoItem.SizeId, cancellationToken);
-                if (exitedProduct == null)
-                    throw new NotFoundException(
-                        string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", dtoItem.ProductId),
+                        $"Product {dtoItem.ProductId} not found",
                         ErrorCodeConstants.NotFound);
 
                 // Match by ProductId + Number
-                var item = existing.OrderItems
+                var orderItem = existing.OrderItems
                     .FirstOrDefault(i => i.ProductId == dtoItem.ProductId && i.Number == dtoItem.Number);
 
-                if (item == null)
+                if (orderItem == null)
                 {
                     // Add new item if quantity > 0
                     if (dtoItem.Quantity <= 0) continue;
 
-                    item = new OrderItem
+                    orderItem = new OrderItem
                     {
-                        ProductId = exitedProduct.Id,
-                        ProductName = exitedProduct.Name,
+                        ProductId = product.Id,
+                        ProductName = product.Name,
                         Quantity = dtoItem.Quantity,
                         Note = dtoItem.Note,
-                        //Size = exitedSize.Id,
+                        Price = product.Price,
                         Number = dtoItem.Number,
-                        Price = exitedProduct.Price
+                        SizeId = dtoItem.SizeId,
+                        IceLevelId = dtoItem.IceLevelId,
+                        SugarLevelId = dtoItem.SugarLevelId,
+                        CoffeeLevelId = dtoItem.CoffeeLevelId,
+                        VariationId = dtoItem.VariationId
                     };
-                    existing.OrderItems.Add(item);
+                    existing.OrderItems.Add(orderItem);
 
-                    logger.LogInformation("Item {ProductId}-{Number} added to order {OrderId}", dtoItem.ProductId, dtoItem.Number, orderId);
+                    logger.LogInformation(
+                        "Item {ProductId}-{Number} added to order {OrderId}",
+                        dtoItem.ProductId, dtoItem.Number, orderId);
                 }
                 else
                 {
                     // Update existing item
                     if (dtoItem.Quantity <= 0)
                     {
-                        existing.OrderItems.Remove(item);
-                        logger.LogInformation("Item {ProductId}-{Number} removed from order {OrderId}", dtoItem.ProductId, dtoItem.Number, orderId);
+                        existing.OrderItems.Remove(orderItem);
+                        logger.LogInformation(
+                            "Item {ProductId}-{Number} removed from order {OrderId}",
+                            dtoItem.ProductId, dtoItem.Number, orderId);
                         continue;
                     }
 
-                    item.Quantity = dtoItem.Quantity;
-                    item.Note = dtoItem.Note;
-                    //item.Size = (int)dtoItem.Size;
-                    item.Number = dtoItem.Number;
+                    orderItem.Quantity = dtoItem.Quantity;
+                    orderItem.Note = dtoItem.Note;
+                    orderItem.Number = dtoItem.Number;
+                    orderItem.SizeId = dtoItem.SizeId;
+                    orderItem.IceLevelId = dtoItem.IceLevelId;
+                    orderItem.SugarLevelId = dtoItem.SugarLevelId;
+                    orderItem.CoffeeLevelId = dtoItem.CoffeeLevelId;
+                    orderItem.VariationId = dtoItem.VariationId;
 
-                    logger.LogInformation("Item {ProductId}-{Number} updated in order {OrderId}", dtoItem.ProductId, dtoItem.Number, orderId);
+                    logger.LogInformation(
+                        "Item {ProductId}-{Number} updated in order {OrderId}",
+                        dtoItem.ProductId, dtoItem.Number, orderId);
                 }
             }
 
-            // --- Remove items not in the payload ---
+            // Remove items not in the payload
             foreach (var item in existing.OrderItems.ToList())
             {
                 if (!payload.OrderItems.Any(d => d.ProductId == item.ProductId && d.Number == item.Number))
                 {
                     existing.OrderItems.Remove(item);
-                    logger.LogInformation("Item {ProductId}-{Number} removed from order {OrderId}", item.ProductId, item.Number, orderId);
+                    logger.LogInformation(
+                        "Item {ProductId}-{Number} removed from order {OrderId}",
+                        item.ProductId, item.Number, orderId);
                 }
             }
 
             // Recalculate totals
             Recalculate(existing);
 
+            // Persist changes
             orderRepository.Update(existing);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -247,23 +276,28 @@ public class OrderService(
             throw;
         }
     }
+
     private void Recalculate(Order order)
     {
         decimal subtotal = 0;
 
         foreach (var item in order.OrderItems)
         {
-            //var unitPrice = item.Size switch
-            //{
-            //    OrderItemSizeEnum.Small => item.Price,
-            //    OrderItemSizeEnum.Medium => item.Price + 1m,
-            //    _ => item.Price
-            //};
+            var size = item.SizeId.HasValue
+                ? (OrderItemSizeEnum)item.SizeId.Value
+                : OrderItemSizeEnum.Small;
 
-            //subtotal += unitPrice * item.Quantity;
+            var unitPrice = size switch
+            {
+                OrderItemSizeEnum.Small => item.Price,
+                OrderItemSizeEnum.Medium => item.Price + 1m,
+                _ => item.Price
+            };
+
+            subtotal += unitPrice * item.Quantity;
         }
 
-        decimal taxRate = 0;
+        decimal taxRate = 0; // adjust if needed
         var tax = subtotal * taxRate;
 
         order.Subtotal = subtotal;

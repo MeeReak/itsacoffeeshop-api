@@ -11,4 +11,11 @@ public class ProductRepository(SmakchetContext context) : BaseRepository<Product
         return await context.Products
             .FirstOrDefaultAsync(c => c.Name == name, cancellationToken);
     }
+
+    public async Task<List<Product>> GetByIdsAsync(List<int> ids, CancellationToken cancellationToken)
+    {
+        return await context.Products
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

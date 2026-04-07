@@ -7,10 +7,13 @@
         public string ProductName { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int Quantity { get; set; }
-        public int Size { get; set; }
         public string Number { get; set; } = string.Empty;
         public string? Note { get; set; }
         public ProductDetailReadDto? ProductDetails { get; set; } // Optional product info
+        public int? SizeId { get; set; }
+        public int? SugarId { get; set; }
+        public int? CoffeeLevelId { get; set; }
+        public int? VariationId { get; set; }
     }
 
     public class ProductDetailReadDto
