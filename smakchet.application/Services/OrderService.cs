@@ -59,7 +59,7 @@ public class OrderService(
                     Note = item.Note,
                     Price = product.Price,
                     Quantity = item.Quantity,
-                    Size = (int)item.Size!
+                    //Size = (int)item.Size!
                 };
 
                 await orderItemRepository.AddAsync(orderItem, cancellationToken);
@@ -174,6 +174,12 @@ public class OrderService(
                         string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", dtoItem.ProductId),
                         ErrorCodeConstants.NotFound);
 
+                var exitedSize = await productRepository.GetByIdAsync(dtoItem.SizeId, cancellationToken);
+                if (exitedProduct == null)
+                    throw new NotFoundException(
+                        string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", dtoItem.ProductId),
+                        ErrorCodeConstants.NotFound);
+
                 // Match by ProductId + Number
                 var item = existing.OrderItems
                     .FirstOrDefault(i => i.ProductId == dtoItem.ProductId && i.Number == dtoItem.Number);
@@ -189,7 +195,7 @@ public class OrderService(
                         ProductName = exitedProduct.Name,
                         Quantity = dtoItem.Quantity,
                         Note = dtoItem.Note,
-                        Size = (int)dtoItem.Size!,
+                        //Size = exitedSize.Id,
                         Number = dtoItem.Number,
                         Price = exitedProduct.Price
                     };
@@ -209,7 +215,7 @@ public class OrderService(
 
                     item.Quantity = dtoItem.Quantity;
                     item.Note = dtoItem.Note;
-                    item.Size = (int)dtoItem.Size!;
+                    //item.Size = (int)dtoItem.Size;
                     item.Number = dtoItem.Number;
 
                     logger.LogInformation("Item {ProductId}-{Number} updated in order {OrderId}", dtoItem.ProductId, dtoItem.Number, orderId);
@@ -247,15 +253,14 @@ public class OrderService(
 
         foreach (var item in order.OrderItems)
         {
-            var unitPrice = item.Size switch
-            {
-                (int)OrderItemSizeEnum.Small => item.Price,
-                (int)OrderItemSizeEnum.Medium => item.Price + 1m,
-                (int)OrderItemSizeEnum.Large => item.Price + 2m,
-                _ => item.Price
-            };
+            //var unitPrice = item.Size switch
+            //{
+            //    OrderItemSizeEnum.Small => item.Price,
+            //    OrderItemSizeEnum.Medium => item.Price + 1m,
+            //    _ => item.Price
+            //};
 
-            subtotal += unitPrice * item.Quantity;
+            //subtotal += unitPrice * item.Quantity;
         }
 
         decimal taxRate = 0;
