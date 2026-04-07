@@ -78,7 +78,7 @@ public class FileStorageService(IAmazonS3 s3Client) : IFileStorageService
             response = await s3Client.ListObjectsV2Async(listRequest, cancellationToken);
             fileNames.AddRange(response.S3Objects.Select(o => o.Key));
             listRequest.ContinuationToken = response.NextContinuationToken;
-        } while ((bool)response.IsTruncated);
+        } while ((bool)response.IsTruncated!);
 
         return fileNames;
     }
