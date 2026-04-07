@@ -1,5 +1,6 @@
 ﻿using smakchet.api.Filter;
 using smakchet.application.DTOs.Category;
+using smakchet.application.DTOs.CoffeeLevel;
 using smakchet.application.DTOs.Ice;
 using smakchet.application.DTOs.IFileStorageService;
 using smakchet.application.DTOs.Order;
@@ -11,6 +12,7 @@ using smakchet.application.DTOs.User;
 using smakchet.application.Helpers;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.ICategory;
+using smakchet.application.Interfaces.ICoffeeLevel;
 using smakchet.application.Interfaces.IIce;
 using smakchet.application.Interfaces.IOrder;
 using smakchet.application.Interfaces.IOrderItem;
@@ -63,6 +65,10 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IMapper<Size, SizeReadDto, SizeDto, SizeUpdateDto>, SizeMapper>();
         services.AddScoped<ISizeRepository, SizeRepository>();
         services.AddScoped<ISizeService, SizeService>();
+
+        services.AddScoped<IMapper<CoffeeLevel, CoffeeLevelReadDto, CoffeeLevelDto, CoffeeLevelUpdateDto>, CoffeeLevelMapper>();
+        services.AddScoped<ICoffeeLevelRepository, CoffeeLevelRepository>();
+        services.AddScoped<ICoffeeLevelService, CoffeeLevelService>();
 
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IOrderItemRepository, OrderItemRepository>();
