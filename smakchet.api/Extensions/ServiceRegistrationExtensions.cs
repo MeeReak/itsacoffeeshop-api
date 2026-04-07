@@ -9,6 +9,7 @@ using smakchet.application.DTOs.Product;
 using smakchet.application.DTOs.Size;
 using smakchet.application.DTOs.Sugar;
 using smakchet.application.DTOs.User;
+using smakchet.application.DTOs.Variation;
 using smakchet.application.Helpers;
 using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.ICategory;
@@ -21,6 +22,7 @@ using smakchet.application.Interfaces.IProduct;
 using smakchet.application.Interfaces.ISize;
 using smakchet.application.Interfaces.ISugar;
 using smakchet.application.Interfaces.IUser;
+using smakchet.application.Interfaces.IVariation;
 using smakchet.application.Mappings;
 using smakchet.application.Repositories;
 using smakchet.application.Services;
@@ -69,6 +71,10 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IMapper<CoffeeLevel, CoffeeLevelReadDto, CoffeeLevelDto, CoffeeLevelUpdateDto>, CoffeeLevelMapper>();
         services.AddScoped<ICoffeeLevelRepository, CoffeeLevelRepository>();
         services.AddScoped<ICoffeeLevelService, CoffeeLevelService>();
+
+        services.AddScoped<IMapper<Variation, VariationReadDto, VariationDto, VariationUpdateDto>, VariationMapper>();
+        services.AddScoped<IVariationRepository, VariationRepository>();
+        services.AddScoped<IVariationService, VariationService>();
 
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IOrderItemRepository, OrderItemRepository>();
