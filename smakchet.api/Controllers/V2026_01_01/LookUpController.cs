@@ -7,7 +7,7 @@ using smakchet.application.Interfaces.ILookupService;
 namespace smakchet.api.Controllers.V2026_01_01
 {
     [ApiVersion("2026-01-01")]
-    [Route("look-ups")]
+    [Route("lookups")]
     [Produces("application/json")]
     [ApiController]
     public class LookUpController(ILookupService service) : ControllerBase

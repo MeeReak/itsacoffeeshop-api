@@ -29,11 +29,12 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddSwaggerGen(); 
+builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerConfiguration();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAppDbContext(builder.Configuration);
 builder.Services.AddAppServices();
+builder.Services.AddMemoryCache();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
