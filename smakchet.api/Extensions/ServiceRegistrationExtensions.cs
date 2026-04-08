@@ -15,6 +15,7 @@ using smakchet.application.Interfaces;
 using smakchet.application.Interfaces.ICategory;
 using smakchet.application.Interfaces.ICoffeeLevel;
 using smakchet.application.Interfaces.IIce;
+using smakchet.application.Interfaces.ILookupService;
 using smakchet.application.Interfaces.IOrder;
 using smakchet.application.Interfaces.IOrderItem;
 using smakchet.application.Interfaces.IPayment;
@@ -56,25 +57,17 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IPaymentService, PaymentService>();
 
-        services.AddScoped<IMapper<Sugar, SugarReadDto, SugarDto, SugarUpdateDto>, SugarMapper>();
         services.AddScoped<ISugarRepository, SugarRepository>();
-        services.AddScoped<ISugarService, SugarService>();
 
-        services.AddScoped<IMapper<Ice, IceReadDto, IceDto, IceUpdateDto>, IceMapper>();
         services.AddScoped<IIceRepository, IceRepository>();
-        services.AddScoped<IIceService, IceService>();
 
-        services.AddScoped<IMapper<Size, SizeReadDto, SizeDto, SizeUpdateDto>, SizeMapper>();
         services.AddScoped<ISizeRepository, SizeRepository>();
-        services.AddScoped<ISizeService, SizeService>();
 
-        services.AddScoped<IMapper<CoffeeLevel, CoffeeLevelReadDto, CoffeeLevelDto, CoffeeLevelUpdateDto>, CoffeeLevelMapper>();
         services.AddScoped<ICoffeeLevelRepository, CoffeeLevelRepository>();
-        services.AddScoped<ICoffeeLevelService, CoffeeLevelService>();
 
-        services.AddScoped<IMapper<Variation, VariationReadDto, VariationDto, VariationUpdateDto>, VariationMapper>();
         services.AddScoped<IVariationRepository, VariationRepository>();
-        services.AddScoped<IVariationService, VariationService>();
+
+        services.AddScoped<ILookupService, LookupService>();
 
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IOrderItemRepository, OrderItemRepository>();
