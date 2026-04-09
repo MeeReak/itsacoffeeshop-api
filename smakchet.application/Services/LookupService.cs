@@ -77,7 +77,7 @@ public class LookupService(
         cache.Set(cacheKey, cachedLookup, TimeSpan.FromHours(12));
       }
 
-      return cachedLookup;
+      return cachedLookup!;
     }
   }
 }
