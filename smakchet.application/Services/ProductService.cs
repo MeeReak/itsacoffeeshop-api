@@ -21,145 +21,148 @@ public class ProductService(
     ILogger<ProductService> logger,
     IHttpContextAccessor contextAccessor) : IProductService
 {
-    public async Task<ProductReadDto> CreateProductAsync(ProductDto productDto, CancellationToken cancellationToken)
+  public async Task<ProductReadDto> CreateProductAsync(ProductDto productDto, CancellationToken cancellationToken)
+  {
+    var existing = await repository.GetByNameAsync(productDto.Name, cancellationToken);
+    if (existing is not null)
     {
-        var existing = await repository.GetByNameAsync(productDto.Name, cancellationToken);
-        if (existing is not null)
-        {
-            logger.LogError(ErrorMessageConstants.AlreadyExists, "Product", productDto.Name);
-            throw new DuplicateException(string.Format(ErrorMessageConstants.AlreadyExists, "Product", productDto.Name),
-                ErrorCodeConstants.Conflict);
-        }
-
-        try
-        {
-            var mapped = mapper.ToEntity(productDto);
-
-            await using var stream = productDto.File.OpenReadStream();
-            mapped.ImageUrl =
-                await fileStorageService.UploadFileAsync(stream, productDto.File.FileName, "products",
-                    cancellationToken);
-
-            await repository.AddAsync(mapped, cancellationToken);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            logger.LogInformation(SuccessMessageConstants.Created, "Product");
-
-            return mapper.ToReadDto(mapped);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, ErrorMessageConstants.OperationFailed, "CreateProduct");
-            throw;
-        }
+      logger.LogError(ErrorMessageConstants.AlreadyExists, "Product", productDto.Name);
+      throw new DuplicateException(string.Format(ErrorMessageConstants.AlreadyExists, "Product", productDto.Name),
+          ErrorCodeConstants.Conflict);
     }
 
-
-    public async Task DeleteProductAsync(int productId, CancellationToken cancellationToken)
+    try
     {
-        var existing = await repository.GetByIdAsync(productId, cancellationToken);
-        if (existing is null)
-        {
-            logger.LogError(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId));
-            throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId),
-                ErrorCodeConstants.NotFound);
-        }
+      var mapped = mapper.ToEntity(productDto);
 
-        try
-        {
-            repository.Delete(existing);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            logger.LogInformation(SuccessMessageConstants.Deleted, "Product");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, ErrorMessageConstants.OperationFailed, "DeleteProduct");
-            throw;
-        }
+      await using var stream = productDto.File.OpenReadStream();
+      mapped.ImageUrl =
+          await fileStorageService.UploadFileAsync(stream, productDto.File.FileName, "products",
+              cancellationToken);
+
+      await repository.AddAsync(mapped, cancellationToken);
+      await unitOfWork.SaveChangesAsync(cancellationToken);
+      logger.LogInformation(SuccessMessageConstants.Created, "Product");
+
+      return mapper.ToReadDto(mapped);
+    }
+    catch (Exception ex)
+    {
+      logger.LogError(ex, ErrorMessageConstants.OperationFailed, "CreateProduct");
+      throw;
+    }
+  }
+
+
+  public async Task DeleteProductAsync(int productId, CancellationToken cancellationToken)
+  {
+    var existing = await repository.GetByIdAsync(productId, cancellationToken);
+    if (existing is null)
+    {
+      logger.LogError(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId));
+      throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId),
+          ErrorCodeConstants.NotFound);
     }
 
-
-    public async Task<ProductReadDto?> GetProductByIdAsync(int productId, CancellationToken cancellationToken)
+    try
     {
-        var existing = await repository.GetByIdAsync(productId, cancellationToken);
-        if (existing is null)
-        {
-            logger.LogError(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId));
-            throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId),
-                ErrorCodeConstants.NotFound);
-        }
+      repository.Delete(existing);
+      await unitOfWork.SaveChangesAsync(cancellationToken);
+      logger.LogInformation(SuccessMessageConstants.Deleted, "Product");
+    }
+    catch (Exception ex)
+    {
+      logger.LogError(ex, ErrorMessageConstants.OperationFailed, "DeleteProduct");
+      throw;
+    }
+  }
 
-        var result = mapper.ToReadDto(existing);
-        logger.LogInformation(SuccessMessageConstants.Retrieved, "Product");
-        return result;
+
+  public async Task<ProductReadDto?> GetProductByIdAsync(int productId, CancellationToken cancellationToken)
+  {
+    var existing = await repository.GetByIdAsync(productId, cancellationToken);
+    if (existing is null)
+    {
+      logger.LogError(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId));
+      throw new NotFoundException(string.Format(ErrorMessageConstants.ResourceNotFoundById, "Product", productId),
+          ErrorCodeConstants.NotFound);
     }
 
+    var result = mapper.ToReadDto(existing);
+    logger.LogInformation(SuccessMessageConstants.Retrieved, "Product");
+    return result;
+  }
 
-    public async Task<ResponsePagingDto<ProductReadDto>> GetProductPagedAsync(PaginationQueryParams param)
+
+  public async Task<ResponsePagingDto<ProductReadDto>> GetProductPagedAsync(PaginationQueryParams param)
+  {
+    IQueryable<Product> query = repository.Query();
+
+    if (param.IsFeature == true)
+      query = query.Where(c => (bool)c.IsFeatured!);
+
+    if (param.CategoryId != 0)
+      query = query.Where(c => c.CategoryId == param.CategoryId);
+
+    if (!string.IsNullOrWhiteSpace(param.Search))
+      query = query.Where(c => c.Name.Contains(param.Search));
+
+    query = query.OrderByDescending(c => c.IsFeatured)
+        .ThenBy(c => c.DisplayOrder);
+
+    var products = await query.ToPagedResultAsync(
+        param.Skip,
+        param.Top,
+        mapper.ToReadDto,
+        contextAccessor.HttpContext);
+
+    logger.LogInformation(SuccessMessageConstants.Retrieved, "Product");
+    return products;
+  }
+
+
+  public async Task<ProductReadDto?> UpdateProductAsync(
+      int productId,
+      ProductUpdateDto productDto,
+      CancellationToken cancellationToken)
+  {
+    var existing = await repository.GetByIdAsync(productId, cancellationToken);
+    if (existing is null)
     {
-        IQueryable<Product> query = repository.Query();
-
-        if (param.IsFeature == true)
-            query = query.Where(c => (bool)c.IsFeatured!);
-
-        if (!string.IsNullOrWhiteSpace(param.Search))
-            query = query.Where(c => c.Name.Contains(param.Search));
-
-        query = query.OrderByDescending(c => c.IsFeatured)
-            .ThenBy(c => c.DisplayOrder);
-
-        var products = await query.ToPagedResultAsync(
-            param.Skip,
-            param.Top,
-            mapper.ToReadDto,
-            contextAccessor.HttpContext);
-
-        logger.LogInformation(SuccessMessageConstants.Retrieved, "Product");
-        return products;
+      logger.LogError($"Product not found by Id {productId}");
+      throw new NotFoundException($"Product not found by Id {productId}", ErrorCodeConstants.NotFound);
     }
 
-
-    public async Task<ProductReadDto?> UpdateProductAsync(
-        int productId,
-        ProductUpdateDto productDto,
-        CancellationToken cancellationToken)
+    try
     {
-        var existing = await repository.GetByIdAsync(productId, cancellationToken);
-        if (existing is null)
-        {
-            logger.LogError($"Product not found by Id {productId}");
-            throw new NotFoundException($"Product not found by Id {productId}", ErrorCodeConstants.NotFound);
-        }
+      var newImageUrl = existing.ImageUrl;
 
-        try
-        {
-            var newImageUrl = existing.ImageUrl;
+      if (productDto.File is not null)
+      {
+        if (!string.IsNullOrEmpty(existing.ImageUrl))
+          await fileStorageService.DeleteFileAsync(existing.ImageUrl, "products", cancellationToken);
 
-            if (productDto.File is not null)
-            {
-                if (!string.IsNullOrEmpty(existing.ImageUrl))
-                    await fileStorageService.DeleteFileAsync(existing.ImageUrl, "products", cancellationToken);
+        await using var stream = productDto.File.OpenReadStream();
+        newImageUrl = await fileStorageService.UploadFileAsync(
+            stream,
+            productDto.File.FileName,
+            "products",
+            cancellationToken);
+      }
 
-                await using var stream = productDto.File.OpenReadStream();
-                newImageUrl = await fileStorageService.UploadFileAsync(
-                    stream,
-                    productDto.File.FileName,
-                    "products",
-                    cancellationToken);
-            }
+      mapper.UpdateEntity(existing, productDto);
+      existing.ImageUrl = newImageUrl;
+      repository.Update(existing);
+      await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            mapper.UpdateEntity(existing, productDto);
-            existing.ImageUrl = newImageUrl;
-            repository.Update(existing);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+      logger.LogInformation("Product updated successfully");
 
-            logger.LogInformation("Product updated successfully");
-
-            return mapper.ToReadDto(existing);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "UpdateProduct operation failed");
-            throw;
-        }
+      return mapper.ToReadDto(existing);
     }
+    catch (Exception ex)
+    {
+      logger.LogError(ex, "UpdateProduct operation failed");
+      throw;
+    }
+  }
 }

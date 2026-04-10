@@ -25,7 +25,8 @@ namespace smakchet.application.Services
       ILogger<PaymentService> logger,
       IConfiguration configuration,
       HttpClient httpClient,
-      IBackgroundQueueService<PaymentStatusJob> backgroundQueue
+      IBackgroundQueueService<PaymentStatusJob> backgroundQueue,
+      IPaymentJobManager jobManager
   ) : IPaymentService
   {
     public async Task<PaymentStatusResponseDto> CheckStatusAsync(
@@ -121,7 +122,7 @@ namespace smakchet.application.Services
 
         await paymentRepository.AddAsync(payment, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        // await backgroundQueue.Enqueue(new PaymentStatusJob(payment.Id));
+        await backgroundQueue.Enqueue(new PaymentStatusJob(payment.Id));
 
         return new PaymentCheckOutDto
         {
@@ -138,6 +139,30 @@ namespace smakchet.application.Services
         logger.LogError(ex, ErrorMessageConstants.OperationFailed, "CheckOutAsync");
         throw;
       }
+    }
+
+    public async Task UpdatePaymentStatusAsync(int paymentId, PaymemtStatusEnum status, CancellationToken cancellationToken)
+    {
+      var payment = await paymentRepository.GetByIdAsync(paymentId, cancellationToken)
+          ?? throw new NotFoundException(
+              string.Format(ErrorMessageConstants.ResourceNotFoundById, "Payment", paymentId),
+              ErrorCodeConstants.NotFound);
+
+      payment.Status = (int)status;
+      if (status == PaymemtStatusEnum.Success)
+      {
+        payment.PaidAt = DateTime.UtcNow;
+      }
+
+      await unitOfWork.SaveChangesAsync(cancellationToken);
+
+      // Cancel the background polling job if it's running
+      jobManager.CancelJob(paymentId);
+
+      logger.LogInformation(
+          "Payment status manually updated for PaymentId {PaymentId}, Status {Status}. Background job cancelled if it was running.",
+          paymentId,
+          status);
     }
 
 

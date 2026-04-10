@@ -40,6 +40,7 @@ namespace smakchet.application.Mappings
                     Note = item.Note,
                     Number = item.Number,
                     SizeId = item.SizeId,
+                    IceId = item.IceLevelId,
                     SugarId = item.SugarLevelId,
                     CoffeeLevelId = item.CoffeeLevelId,
                     VariationId = item.VariationId,

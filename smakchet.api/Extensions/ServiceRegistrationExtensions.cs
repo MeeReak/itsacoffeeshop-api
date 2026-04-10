@@ -33,54 +33,58 @@ namespace smakchet.api.Extensions;
 
 public static class ServiceRegistrationExtensions
 {
-    public static IServiceCollection AddAppServices(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+  public static IServiceCollection AddAppServices(this IServiceCollection services)
+  {
+    services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
-        services.AddScoped<IMapper<User, UserReadDto, UserDto, UserUpdateDto>, UserMapper>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserService, UserService>();
+    services.AddScoped<IMapper<User, UserReadDto, UserDto, UserUpdateDto>, UserMapper>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IUserService, UserService>();
+    services.AddScoped<IPaymentService, PaymentService>();
+    services.AddSingleton<IPaymentJobManager, PaymentJobManager>();
 
-        services.AddScoped<IMapper<Category, CategoryReadDto, CategoryDto, CategoryUpdateDto>, CategoryMapper>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-        services.AddScoped<ICategoryService, CategoryService>();
+    services.AddScoped<IMapper<Category, CategoryReadDto, CategoryDto, CategoryUpdateDto>, CategoryMapper>();
+    services.AddScoped<ICategoryRepository, CategoryRepository>();
+    services.AddScoped<ICategoryService, CategoryService>();
 
-        services.AddScoped<IMapper<Product, ProductReadDto, ProductDto, ProductUpdateDto>, ProductMapper>();
-        services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<IProductService, ProductService>();
+    services.AddScoped<IMapper<Product, ProductReadDto, ProductDto, ProductUpdateDto>, ProductMapper>();
+    services.AddScoped<IProductRepository, ProductRepository>();
+    services.AddScoped<IProductService, ProductService>();
 
-        services.AddScoped<IMapper<Order, OrderReadDto, OrderDto, OrderUpdateDto>, OrderMapper>();
-        services.AddScoped<IOrderRepository, OrderRepository>();
-        services.AddScoped<IOrderService, OrderService>();
+    services.AddScoped<IMapper<Order, OrderReadDto, OrderDto, OrderUpdateDto>, OrderMapper>();
+    services.AddScoped<IOrderRepository, OrderRepository>();
+    services.AddScoped<IOrderService, OrderService>();
 
-        services.AddScoped<IMapper<Payment, PaymentReadDto, PaymentDto, PaymentUpdateDto>, PaymentMapper>();
-        services.AddScoped<IPaymentRepository, PaymentRepository>();
-        services.AddScoped<IPaymentService, PaymentService>();
+    services.AddScoped<IMapper<Payment, PaymentReadDto, PaymentDto, PaymentUpdateDto>, PaymentMapper>();
+    services.AddScoped<IPaymentRepository, PaymentRepository>();
 
-        services.AddScoped<ISugarRepository, SugarRepository>();
+    services.AddScoped<ISugarRepository, SugarRepository>();
 
-        services.AddScoped<IIceRepository, IceRepository>();
+    services.AddScoped<IIceRepository, IceRepository>();
 
-        services.AddScoped<ISizeRepository, SizeRepository>();
+    services.AddScoped<ISizeRepository, SizeRepository>();
 
-        services.AddScoped<ICoffeeLevelRepository, CoffeeLevelRepository>();
+    services.AddScoped<ICoffeeLevelRepository, CoffeeLevelRepository>();
 
-        services.AddScoped<IVariationRepository, VariationRepository>();
+    services.AddScoped<IVariationRepository, VariationRepository>();
 
-        services.AddScoped<ILookupService, LookupService>();
+    services.AddScoped<ILookupService, LookupService>();
 
-        services.AddScoped<IFileStorageService, FileStorageService>();
-        services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+    services.AddScoped<IFileStorageService, FileStorageService>();
+    services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+    services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        services.AddSingleton<IBackgroundQueueService<PaymentStatusJob>,
-            BackgroundQueueService<PaymentStatusJob>>();
+    services.AddSingleton<IBackgroundQueueService<PaymentStatusJob>,
+        BackgroundQueueService<PaymentStatusJob>>();
 
-        services.AddHostedService<PaymentStatusWorker>();
+    services.AddHostedService<PaymentStatusWorker>();
+    services.AddSingleton<IBackgroundQueueService<PaymentStatusJob>, BackgroundQueueService<PaymentStatusJob>>();
+    services.AddSingleton<IPaymentJobManager, PaymentJobManager>();
 
+    services.AddHostedService<PaymentStatusWorker>();
 
-        services.AddScoped<ApiDeprecateActionFilter>();
-        return services;
-    }
+    services.AddScoped<ApiDeprecateActionFilter>();
+    return services;
+  }
 }

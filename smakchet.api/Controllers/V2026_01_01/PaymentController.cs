@@ -39,16 +39,28 @@ namespace smakchet.api.Controllers.V2026_01_01
     }
 
 
-    [HttpGet("{orderId:int}/status")]
+    [HttpGet("{paymentId:int}/status")]
     [ProducesResponseType(typeof(PaymentStatusResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CheckStatusAsync(
-        int orderId,
+        int paymentId,
         CancellationToken cancellationToken)
     {
-      var result = await service.CheckStatusAsync(orderId, cancellationToken);
+      var result = await service.CheckStatusAsync(paymentId, cancellationToken);
 
       return Ok(result);
+    }
+
+    [HttpPut("{paymentId:int}/status")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateStatus(
+        int paymentId,
+        [FromQuery] smakchet.application.Constants.Enum.PaymemtStatusEnum status,
+        CancellationToken cancellationToken)
+    {
+      await service.UpdatePaymentStatusAsync(paymentId, status, cancellationToken);
+      return NoContent();
     }
   }
 }

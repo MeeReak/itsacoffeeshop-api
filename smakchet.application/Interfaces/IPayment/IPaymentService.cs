@@ -1,4 +1,5 @@
-﻿using smakchet.application.DTOs.Payment;
+﻿using smakchet.application.Constants.Enum;
+using smakchet.application.DTOs.Payment;
 
 namespace smakchet.application.Interfaces.IPayment
 {
@@ -9,6 +10,7 @@ namespace smakchet.application.Interfaces.IPayment
       int paymentId,
       CancellationToken cancellationToken);
     Task<PaymentReadDto?> GetPaymentOrderByIdAsync(int paymentId, CancellationToken cancellationToken);
+    Task UpdatePaymentStatusAsync(int paymentId, PaymemtStatusEnum status, CancellationToken cancellationToken);
     //Task<dynamic> Verification();
     //Task<dynamic> DecodeKHQR();
     //Task<dynamic> GenerateDeeplink();
