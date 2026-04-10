@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using smakchet.application.DTOs.Error;
+using smakchet.application.DTOs.Success;
 using System.Text.RegularExpressions;
 
 namespace smakchet.api.Extensions;
@@ -25,16 +26,14 @@ public static class InvalidModelStateResponse
             }))
             .ToList();
 
-        var response = new ResponseErrorDto
+        var error = new ErrorDto
         {
-            Error = new ErrorDto
-            {
-                Code = "InvalidModelState",
-                Message = "Validation failed for one or more fields.",
-                Target = "ModelValidation",
-                Details = errors
-            }
+            Code = "InvalidModelState",
+            Message = "Validation failed for one or more fields.",
+            Details = errors
         };
+
+        var response = ResponseDto<object>.Fail("Validation failed", error);
 
         return new BadRequestObjectResult(response);
     }

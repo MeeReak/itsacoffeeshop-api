@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using smakchet.application.DTOs.Error;
 using smakchet.application.DTOs.Payment;
+using smakchet.application.DTOs.Success;
 using smakchet.application.Interfaces.IPayment;
 
 namespace smakchet.api.Controllers.V2026_01_01
@@ -13,54 +14,57 @@ namespace smakchet.api.Controllers.V2026_01_01
   public class PaymentController(IPaymentService service) : ControllerBase
   {
     [HttpGet("{paymentId:int}")]
-    [ProducesResponseType(typeof(PaymentReadDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<PaymentReadDto>> GetPaymentAsync(int paymentId, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ResponseDto<PaymentReadDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPaymentAsync(int paymentId, CancellationToken cancellationToken)
     {
       var payment = await service.GetPaymentOrderByIdAsync(paymentId, cancellationToken);
-      return StatusCode(StatusCodes.Status200OK, payment);
+      return Ok(ResponseDto<PaymentReadDto>.Ok(payment));
     }
 
 
     [HttpPost("{orderId:int}/checkout")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CheckOutAsync(
         int orderId,
         [FromBody] PaymentDto paymentDto,
         CancellationToken cancellationToken)
     {
       if (paymentDto == null)
-        return BadRequest(new ResponseErrorDto { Error = new ErrorDto { Message = "Payment data is required." } });
+      {
+          var error = new ErrorDto { Code = "BadRequest", Message = "Payment data is required." };
+          return BadRequest(ResponseDto<object>.Fail("Payment data is required.", error));
+      }
 
       var response = await service.CheckOutAsync(orderId, paymentDto, cancellationToken);
-      return Ok(response);
+      return Ok(ResponseDto<object>.Ok(response, "Checkout successful"));
     }
 
 
     [HttpGet("{paymentId:int}/status")]
-    [ProducesResponseType(typeof(PaymentStatusResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ResponseDto<PaymentStatusResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CheckStatusAsync(
         int paymentId,
         CancellationToken cancellationToken)
     {
       var result = await service.CheckStatusAsync(paymentId, cancellationToken);
 
-      return Ok(result);
+      return Ok(ResponseDto<PaymentStatusResponseDto>.Ok(result));
     }
 
     [HttpPut("{paymentId:int}/status")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatus(
         int paymentId,
         [FromQuery] smakchet.application.Constants.Enum.PaymemtStatusEnum status,
         CancellationToken cancellationToken)
     {
       await service.UpdatePaymentStatusAsync(paymentId, status, cancellationToken);
-      return NoContent();
+      return Ok(ResponseDto<object>.Ok(null, "Payment status updated successfully"));
     }
   }
 }

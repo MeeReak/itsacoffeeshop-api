@@ -15,53 +15,52 @@ namespace smakchet.api.Controllers.V2026_01_01
     public class ProductController(IProductService service) : ControllerBase
     {
         [HttpGet]
-        [ProducesResponseType(typeof(ResponsePagingDto<ProductReadDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseDto<ResponsePagingDto<ProductReadDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPag([FromQuery] PaginationQueryParams param)
         {
-            var categories = await service.GetProductPagedAsync(param);
-            return StatusCode(StatusCodes.Status200OK, categories);
+            var products = await service.GetProductPagedAsync(param);
+            return Ok(ResponseDto<ResponsePagingDto<ProductReadDto>>.Ok(products));
         }
 
 
         [HttpGet("{productId:int}")]
-        [ProducesResponseType(typeof(ProductReadDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseDto<ProductReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProduct(int productId, CancellationToken cancellationToken)
         {
-
             var product = await service.GetProductByIdAsync(productId, cancellationToken);
-            return StatusCode(StatusCodes.Status200OK, product);
+            return Ok(ResponseDto<ProductReadDto>.Ok(product));
         }
 
 
         [HttpPost]
-        [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseDto<ProductReadDto>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SaveProduct([FromForm] ProductDto productDto, CancellationToken cancellationToken)
         {
             var product = await service.CreateProductAsync(productDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created, product);
+            return StatusCode(StatusCodes.Status201Created, ResponseDto<ProductReadDto>.Ok(product, "Product created successfully"));
         }
 
 
         [HttpPut("{productId:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateProduct(int productId, ProductUpdateDto productDto, CancellationToken cancellationToken)
+        [ProducesResponseType(typeof(ResponseDto<ProductReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateProduct(int productId, [FromForm] ProductUpdateDto productDto, CancellationToken cancellationToken)
         {
             var product = await service.UpdateProductAsync(productId, productDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created, product);
+            return Ok(ResponseDto<ProductReadDto>.Ok(product, "Product updated successfully"));
         }
 
 
-        [HttpDelete("{ProductId:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        [HttpDelete("{productId:int}")]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteProduct(int productId, CancellationToken cancellationToken)
         {
             await service.DeleteProductAsync(productId, cancellationToken);
-            return StatusCode(StatusCodes.Status204NoContent);
+            return Ok(ResponseDto<object>.Ok(null, "Product deleted successfully"));
         }
     }
 }

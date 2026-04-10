@@ -45,6 +45,7 @@ if (app.Environment.IsDevelopment())
 
 }
 app.UseCors(MyAllowSpecificOrigins);
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 //app.UseAuthorization();

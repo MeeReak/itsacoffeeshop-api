@@ -145,6 +145,18 @@ public class OrderService(
   public async Task<ResponsePagingDto<OrderReadDto>> GetOrderPagedAsync(PaginationQueryParams param)
   {
     IQueryable<Order> query = orderRepository.Query()
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Product)
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Size)
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.IceLevel)
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.SugarLevel)
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.CoffeeLevel)
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Variation)
         .AsNoTracking();
 
     if (!string.IsNullOrWhiteSpace(param.Search))

@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using smakchet.application.DTOs.Success;
 
 namespace smakchet.api.Controllers.V2026_01_01
 {
@@ -10,10 +11,10 @@ namespace smakchet.api.Controllers.V2026_01_01
     public class HealthController : ControllerBase
     {
         [HttpGet]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        public ActionResult<string> Health()
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status200OK)]
+        public IActionResult Health()
         {
-            return Ok(new { message = "Service is running!!" });
+            return Ok(ResponseDto<object>.Ok(new { status = "Healthy" }, "Service is running!!"));
         }
     }
 }

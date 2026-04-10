@@ -1,12 +1,15 @@
-﻿using smakchet.application.DTOs.Category;
+﻿using Microsoft.Extensions.Configuration;
+using smakchet.application.DTOs.Category;
 using smakchet.application.DTOs.Product;
 using smakchet.application.Interfaces.IProduct;
 using smakchet.dal.Models;
 
 namespace smakchet.application.Mappings
 {
-    public class ProductMapper : IProductMapper
+    public class ProductMapper(IConfiguration configuration) : IProductMapper
     {
+        private readonly string _baseUrl = configuration["Minio:ServiceUrl"] ?? "http://localhost:9000";
+
         public Product ToEntity(ProductDto dto)
         {
             return new Product
@@ -31,7 +34,7 @@ namespace smakchet.application.Mappings
                 CategoryId = entity.CategoryId,
                 Description = entity.Description,
                 DisplayOrder = entity.DisplayOrder,
-                ImageUrl = $"http://localhost:9000{entity.ImageUrl}" ,
+                ImageUrl = $"{_baseUrl}{entity.ImageUrl}" ,
                 IsFeatured = entity.IsFeatured,
                 CreatedAt = entity.CreatedAt
             };

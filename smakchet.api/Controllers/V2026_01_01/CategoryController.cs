@@ -15,53 +15,53 @@ namespace smakchet.api.Controllers.V2026_01_01
     public class CategoryController(ICategoryService service) : ControllerBase
     {
         [HttpGet]
-        [ProducesResponseType(typeof(ResponsePagingDto<CategoryReadDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseDto<ResponsePagingDto<CategoryReadDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPag([FromQuery] PaginationQueryParams param)
         {
             var categories = await service.GetCategoryPagedAsync(param);
-            return StatusCode(StatusCodes.Status200OK, categories);
+            return Ok(ResponseDto<ResponsePagingDto<CategoryReadDto>>.Ok(categories));
         }
 
 
         [HttpGet("{categoryId:int}")]
-        [ProducesResponseType(typeof(CategoryReadDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseDto<CategoryReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCategory(int categoryId, CancellationToken cancellationToken)
         {
 
             var category = await service.GetCategoryByIdAsync(categoryId, cancellationToken);
-            return StatusCode(StatusCodes.Status200OK, category);
+            return Ok(ResponseDto<CategoryReadDto>.Ok(category));
         }
 
 
         [HttpPost]
-        [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseDto<CategoryReadDto>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SaveCategory([FromBody] CategoryDto categoryDto, CancellationToken cancellationToken)
         {
             var category = await service.CreateCategoryAsync(categoryDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created, category);
+            return StatusCode(StatusCodes.Status201Created, ResponseDto<CategoryReadDto>.Ok(category, "Category created successfully"));
         }
 
 
         [HttpPut("{categoryId:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseDto<CategoryReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCategory(int categoryId, CategoryUpdateDto categoryDto, CancellationToken cancellationToken)
         {
             var category = await service.UpdateCategoryAsync(categoryId, categoryDto, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created, category);
+            return Ok(ResponseDto<CategoryReadDto>.Ok(category, "Category updated successfully"));
         }
 
 
         [HttpDelete("{categoryId:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ResponseErrorDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseDto<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCategory(int categoryId, CancellationToken cancellationToken)
         {
             await service.DeleteCategoryAsync(categoryId, cancellationToken);
-            return StatusCode(StatusCodes.Status204NoContent);
+            return Ok(ResponseDto<object>.Ok(null, "Category deleted successfully"));
         }
     }
 }

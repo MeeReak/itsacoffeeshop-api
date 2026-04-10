@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using smakchet.application.DTOs.Error;
+using smakchet.application.DTOs.Success;
 using System.Text.Json;
 
 namespace smakchet.application.Exceptions;
@@ -10,86 +11,56 @@ public static class HandlerException
     {
         context.Response.ContentType = "application/json";
 
-        ResponseErrorDto errorResponse;
+        ErrorDto error;
         int statusCode;
+        string message;
 
         switch (exception)
         {
             case NotFoundException nfEx:
                 statusCode = StatusCodes.Status404NotFound;
-                errorResponse = new ResponseErrorDto
+                message = nfEx.Message;
+                error = new ErrorDto
                 {
-                    Error = new ErrorDto
-                    {
-                        Code = nfEx.ErrorCode,
-                        Message = nfEx.Message,
-                        Target = nfEx.TargetSite!.Name,
-                        InnerError = new InnerErrorDto
-                        {
-                            Code = nfEx.ErrorCode,
-                            Message = $"traceId: {context.TraceIdentifier}"
-                        }
-                    }
+                    Code = nfEx.ErrorCode,
+                    Message = nfEx.Message
                 };
                 break;
 
             case BadRequestException brEx:
                 statusCode = StatusCodes.Status400BadRequest;
-                errorResponse = new ResponseErrorDto
+                message = brEx.Message;
+                error = new ErrorDto
                 {
-                    Error = new ErrorDto
-                    {
-                        Code = brEx.ErrorCode,
-                        Message = brEx.Message,
-                        Target = brEx.TargetSite!.Name,
-                        InnerError = new InnerErrorDto
-                        {
-                            Code = brEx.ErrorCode,
-                            Message = $"traceId: {brEx.InnerException?.Message}"
-                        }
-                    }
+                    Code = brEx.ErrorCode,
+                    Message = brEx.Message
                 };
                 break;
 
-            case DuplicateException brEx:
+            case DuplicateException dEx:
                 statusCode = StatusCodes.Status409Conflict;
-                errorResponse = new ResponseErrorDto
+                message = dEx.Message;
+                error = new ErrorDto
                 {
-                    Error = new ErrorDto
-                    {
-                        Code = brEx.ErrorCode,
-                        Message = brEx.Message,
-                        Target = brEx.TargetSite!.Name,
-                        InnerError = new InnerErrorDto
-                        {
-                            Code = brEx.ErrorCode,
-                            Message = $"traceId: {brEx.InnerException?.Message}"
-                        }
-                    }
+                    Code = dEx.ErrorCode,
+                    Message = dEx.Message
                 };
-                break; 
+                break;
 
             default:
                 statusCode = StatusCodes.Status500InternalServerError;
-                errorResponse = new ResponseErrorDto
+                message = "An unexpected error occurred.";
+                error = new ErrorDto
                 {
-                    Error = new ErrorDto
-                    {
-                        Code = "InternalServerError",
-                        Message = "An unexpected error occurred.",
-                        Target = exception.TargetSite!.Name,
-                        InnerError = new InnerErrorDto
-                        {
-                            Code = "UnhandledException",
-                            Message = $"traceId: {context.TraceIdentifier}"
-                        }
-                    }
+                    Code = "InternalServerError",
+                    Message = message
                 };
                 break;
         }
 
         context.Response.StatusCode = statusCode;
-        var json = JsonSerializer.Serialize(errorResponse);
+        var response = ResponseDto<object>.Fail(message, error);
+        var json = JsonSerializer.Serialize(response);
         return context.Response.WriteAsync(json);
     }
 }
